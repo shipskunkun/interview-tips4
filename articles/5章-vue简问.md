@@ -15,45 +15,46 @@
 
 1. v-show 和 v-if 的区别
 
-	v-show 是通过 css display 控制显示和隐藏，
 	
-	v-if 组件真正的销毁和渲染，而不是显示和隐藏
-	
-	频繁切换显示状态使用 v-show，否则用 v-if
+		v-show 是通过 css display 控制显示和隐藏，
+		
+		v-if 组件真正的销毁和渲染，而不是显示和隐藏
+		
+		频繁切换显示状态使用 v-show，否则用 v-if
 
 
 2. 为何 在 v-for 中使用 key
 
-	必须使用 key, 且不能是 index 和 random
-	
-	diff 算法中 通过 tag 和 key 判断，是否是 sameNode
-	
-	减少渲染次数，提高渲染性能
+		必须使用 key, 且不能是 index 和 random
+		
+		diff 算法中 通过 tag 和 key 判断，是否是 sameNode
+		
+		减少渲染次数，提高渲染性能
 	
 3. vue 组件生命周期，包括父子组件
 
 4. vue 组件如何通讯（常见
 	
-	父子组件， props 和 $emit
-	
-	vuex
-	
-	自定义事件， event.$on  event.$off event.$emit
+		父子组件， props 和 $emit
+		
+		vuex
+		
+		自定义事件， event.$on  event.$off event.$emit
 	
 5. vue 组件渲染和更新的过程
 
-	三大模块，
-	
-	响应式，监听属性变化 get、setter
-	
-	收集依赖，watcher 
-	
-	模板渲染，render，vdom 
+		三大模块，
+		
+		响应式，监听属性变化 get、setter
+		
+		收集依赖，watcher 
+		
+		模板渲染，render，vdom 
 
 	
-	render => (touch ) getter
-	
-	setter =>  (notify) watcher => render 
+		render => (touch ) getter
+		
+		setter =>  (notify) watcher => render 
 	
 
 ## 5-2
@@ -62,9 +63,9 @@
 1. v-model 实现原理
 
 	
-		input 中的 value = this.name
+		input 中，展示的 value = this.name
 		
-		绑定input 事件， this.name =  $event.target.value
+		绑定input 事件，oninput,   this.name =  $event.target.value
 		
 		data 更新触发 re-render
 
@@ -82,6 +83,9 @@
 		提高性能
 	
 4.  为何组件data 必须是一个函数
+
+	数据隔离。
+		
 	
 		每个文件，.vue 编译之后，是一个类，
 		
@@ -93,6 +97,10 @@
 
 
 5. ajax 请求放在哪个生命周期
+
+	####真的，面过了，而且还答错了。
+
+		看情况，一般放在created 中就可以了，如果有依赖dom 必须存在的情况，就放到 mounted中
 
 		mounted 中，js渲染完， 数据挂载完。  
 		js 是单线程的，ajax 异步获取数据，   
@@ -233,4 +241,4 @@
 		vue-loader 在开发环境做预编译
 		图片懒加载
 		使用ssr
-		
+		 

@@ -24,9 +24,33 @@ deep, 为什么不能打印出old值？
 		deep: true
 		handler(oldval, val) {}
 
-	watch 如果监听引用类型，是拿不到 oldVal 的 ？？？ 这是什么意思
+	###watch 如果监听引用类型，是拿不到 oldVal 的 ？？？ 这是什么意思
 	
-	
+	```
+	var vm = new Vue({
+        el: '#app',
+        data: {
+            name: '双越',
+            info: {
+                city: '北京'
+            }
+        },
+        watch: {
+            name(oldVal, val) {
+                console.log('watch name', oldVal, val) // 值类型，可正常拿到 oldVal 和 val
+            },
+            info: {
+                handler(oldVal, val) {
+                    console.log('watch info', oldVal, val)
+                    console.log('watch info', oldVal.city, val.city)  // 显示一样
+
+                  // 引用类型，拿不到 oldVal 。因为指针相同，此时已经指向了新的 val
+                },
+                deep: true // 深度监听
+            }
+        }
+    })
+	```
 	
 4. 动态绑定 class 的几种写法
 
@@ -68,21 +92,40 @@ event 参数，自定义参数
 事件被绑定到哪里
 
 
-## 3-4 父子通信
+## 3-4 父子通信、自定义事件
 
-props 和 $emit
-
-组件间通讯 - 自定义事件
+props 和 ```$emit```
 
 组件生命周期
 
+组件间通讯 - 自定义事件
+
+
+```
+主要用于，兄弟、亲戚 组件之间通信
+	
+event = new Vue();
+	
+// A 页面调用自定义事件
+event.$emit('onAddTitle', this.title)
+   	
+   	
+// B 页面，注册监听
+mounted() {
+    // 绑定自定义事件， 这里绑定，事件名称，解绑自定义事件。
+    event.$on('onAddTitle', this.addTitleHandler)
+},
+beforeDestroy() {
+    // 及时销毁，否则可能造成内存泄露
+    event.$off('onAddTitle', this.addTitleHandler)
+}
+```	
 
 
 
-## 3-5 自定义组件
 ## 3-6 父子组件生命周期
 
-[!img](https://segmentfault.com/img/bVbq6SZ)
+![img](https://segmentfault.com/img/bVbq6SZ)
 
 
 beforeCreate，实例初始化在这个生命周期遍历 data 对象下所有属性将其转化为 getter/setter,  无data,
@@ -222,7 +265,9 @@ components: {
 
 ## 3-13 keep-alive
 
-作用：缓存组件，当我们频繁的切换组件，不需要重复渲染
+作用：缓存组件，当我们频繁的切换组件，不需要重复渲染	
+vue 常见性能优化
+
 
 
 使用 v-if 显示组件，组件 是会销毁和重新渲染组件, 显示触发 mounted，false 触发 destroyed
@@ -250,6 +295,17 @@ v-show 是通过  display 控制的
 多个组件有相同的逻辑，抽离出来
 
 和 小程序的 behaviors 一样
+
+
+### (面试问到了
+值为对象的选项，例如 methods、components 和 directives，将被合并为同一个对象。两个对象键名冲突时，取组件对象的键值对。
+
+methods 和 data 中，相同的可能会冲突，组件中会代替， mixin 中
+而 mounted 中，不会覆盖, 会合并
+
+
+
+
 
 ```
 // myMixin.js

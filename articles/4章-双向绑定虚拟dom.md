@@ -32,16 +32,34 @@ asp、jsp、php 已经有组件化了
 数据驱动视图，vue MVVM  
 数据驱动视图，react setState  
 
-[!img](https://upload-images.jianshu.io/upload_images/13119656-40e070c90fe8f861.png?imageMogr2/auto-orient/strip|imageView2/2/w/758/format/webp)
+![img](https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2307375690,2929922670&fm=26&gp=0.jpg)
 
 ## 4-3、4-4 数据监听
 
 如何起一个服务？  
 在目标文件夹下：  
 
+#### 区别，面试问到了
+
+oninput和onchange的区别
+
+不同之处在于oninput事件在元素值发送变化是立即触发，onchange在元素失去焦点时触发
+
+
+
 ```
 npm i http-server -g   
 http-server -p 8001  
+
+// updateView 可能这么写？
+function observe() {
+    spanName.innerHTML = obj.name;
+    inpName.value = obj.name;
+}
+inpName.oninput = function () {
+    obj.name = this.value;
+};
+
 
 // 一级监听
 function defineReactive(target, key, value) {
@@ -107,12 +125,15 @@ function observer(target) {
 
 
 
-缺点：
-
+Obect.defineProperty   的缺点：
+	
+	深度监听，需要递归，一次性计算量大
 	监听对象的属性，如果属性还是对象，需要深度监听，而且是递归
+	
 	无法监听新增、删除属性
 		如果data 添加了新的属性，是无法监听到的，需要使用 Vue.set
 		无法监听 delete data 中的属性, Vue.delete
+	
 	无法原生监听数组，需要特殊处理
 	
 	
@@ -120,12 +141,27 @@ function observer(target) {
  
  	需要对监听的数组，做深拷贝
  	
- 	```
- 	// 如果是数组，原型指向定义的 数组
- 	if (Array.isArray(target)) {
+ 	为啥要这么做，可以监听，数组的 push、pop 等方法，对数组的修改，更新视图
+ 	
+ 	
+```
+ function observer(target) {
+    if (typeof target !== 'object' || target === null) {
+        // 不是对象或数组
+        return target
+    }
+
+   	// 如果是数组的话
+    if (Array.isArray(target)) {
         target.__proto__ = arrProto
     }
- 	
+
+    // 重新定义各个属性（for in 也可以遍历数组）
+    for (let key in target) {
+        defineReactive(target, key, target[key])
+    }
+} 	
+
  	
  	// arrProto 类的数组，有啥特点
  	const oldArrayProperty = Array.prototype
@@ -143,7 +179,7 @@ function observer(target) {
         
     }
 })
-	```
+```
 	
 
 ## 4-6、4-7 虚拟dom, virtual dom
@@ -205,6 +241,10 @@ children: [{
 // children 和 text 不能共存，子元素要么是文本，要么是 有很多子节点的 节点
 
 var vnode = h(sel, data, children, text, elm, key)
+
+var node = h('div#container.two.classes', {on: {click: someFn}},
+[h(), 'text', h()])
+
 
 patch(container, vnode)
 
@@ -566,28 +606,3 @@ to C， 考虑使用 h5 history, 但是需要服务端支持
 
 
 略
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
