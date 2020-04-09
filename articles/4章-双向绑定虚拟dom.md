@@ -279,28 +279,33 @@ if(oldVnode === vnode) return
 
 1. 部分代码
 
-	if(isUndef(vnode.text))   // 如果新的节点 不是文本节点 。
+		if(isUndef(vnode.text))   // 如果新的节点 不是文本节点 。
 	
 		意味着，新节点，要么是空，要么有孩子，
-		
-		if(isDef(oldCh) && idDef(ch))  //如果新旧节点都有孩子
-			if( oldCh !== ch)  updataChildren(...,...) // 两孩子不相等，比较孩子节点
-		else if (isDef(ch))  // 如果新节点有孩子，旧节点没孩子
+		//如果新旧节点都有孩子
+		if(isDef(oldCh) && idDef(ch))  
+		// 两孩子不相等，比较孩子节点
+			if( oldCh !== ch)  updataChildren(...,...)  
+			 else if (isDef(ch))  // 如果新节点有孩子，旧节点没孩子
 			if(isDef(oldVnode.text) api.setTextContent() // 如果新节点孩子有文本，添加文本节点 
 			addVnodes()  // 添加，新节点孩子为 Vnode
 		else if( idDef(oldCh))  //如果旧结点有孩子， 新节点无孩子
 				removeNodes(...,...)  // 把旧结点孩子移除
-			else if( isDef(oldVnode.text)) {  //如果旧节点的无孩子，但是节点有本
-				api.setTextContent(elm, '') //旧节点文本置为空
-			}
+		else if( isDef(oldVnode.text)) {  //如果旧节点的无孩子，但是节点有本
+			api.setTextContent(elm, '') //旧节点文本置为
+		else if(oldeVonde.text !== vnode.text)   // 如果新旧节点 text 不一致
+		if(isDef(oldCh)) {  // 如果旧节点还有孩子
+			removeVondes(elm, oldCh, ...)  // 移除旧节点 孩子
+		}
+		api.setTextContent(elm, vnode.text)  // 把新旧节点，text 设成一样
+		
  
-2. else if(oldeVonde.text !== vnode.text)   // 如果新旧节点 text 不一致
-	if(isDef(oldCh)) {  // 如果旧节点还有孩子
-		removeVondes(elm, oldCh, ...)  // 移除旧节点 孩子
-	}
-	api.setTextContent(elm, vnode.text)  // 把新旧节点，text 设成一样
-	
-3. 
+ 
+ 核心patch:
+ 	
+	 	两个都有孩子，比较孩子
+	 	如果新的有孩子，旧的没有，直接添加
+	 	如果新的没有孩子，旧的有，移除
 
 
 ## 4-12 updataChildren  （ todo
@@ -465,6 +470,10 @@ react 一直使用 render， 没有模板
 ## 4-17  review
 ## 4-18 vue 如何渲染和更新的
 
+
+####问道了！
+
+
 初次渲染：
 	
 	1. 解析模板为 render 函数
@@ -488,7 +497,7 @@ react 一直使用 render， 没有模板
 
 流程图
 
-[!img](https://cn.vuejs.org/images/data.png)
+![img](https://cn.vuejs.org/images/data.png)
 
 ## 4-19 vue 组件异步渲染
 
@@ -592,7 +601,7 @@ window.onpopstate = (event) => { // 重要！！
 
 需要后端配合：
 
-无论你访问什么，都返回  index.html 页面   
+无论你访问什么路由，都返回  index.html 页面   
 否则会报错， 跳转到新路由，这个页面找不到  
 
 

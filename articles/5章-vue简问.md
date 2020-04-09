@@ -57,7 +57,7 @@
 		setter =>  (notify) watcher => render 
 	
 
-## 5-2
+## 5-2 
 
 
 1. v-model 实现原理
@@ -142,7 +142,7 @@
 		
 		清楚定时器
 		
-		解绑自定义的dom 事件，如 window scroll
+		解绑自定义的dom 事件，addEventLisener, 如 window scroll
 	
 2. 什么是作用域插槽？
 
@@ -214,7 +214,7 @@
 ## 5-6
 		
 1. 简述 diff 算法过程
-
+ 
 		patch(elem, vnode) 和 patch(vnode, newVnode)  
 		patchVnode 、addVnodes 、 removeVnodes  
 		updataChildren  
