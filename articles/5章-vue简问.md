@@ -177,6 +177,21 @@
 
 1. vnode 描述一个 dom 结构
 
+		{
+			tag: 'div',
+			props: {
+				className: 'container',
+				id: 'div1'
+			},
+			children: [
+				{
+					tag: 'p',
+				 	children: 'vdom'
+				},{
+					...
+				}]
+		}
+
 2. 监听data变化核心 API
 
 		Object.defineProperty
@@ -185,7 +200,8 @@
 		
 		缺点
 
-3. 监听数组变化？
+
+#### 3. 监听数组变化？（重要！
 	
 		Object.defineProperty 不能监听数组变化
 		
@@ -220,25 +236,32 @@
 		updataChildren  
 	
 2. vue 是为何一步渲染，$nextTick 有什么效果
-
+	
+		异步渲染，合并data修改，提高渲染性能
+		
+		$nextTick 在 DOM 更新完之后，触发回调
 	
 3. vue 常见性能优化
 		
 	vue层级做的：
 	
-		合理使用 v-show v-if
-		合理使用 computed
-		v-for 时加key， 避免和 v-if 一起使用
+		1.合理使用 v-show v-if
+		2. 合理使用 computed
+		3. v-for 时加key， 避免和 v-if 一起使用
+		4. 合理使用keep-alive
 		
-		自定义事件，dom事件，及时销毁
-		合理使用异步组件
-		合理使用keep-alive
-	
-		data 层级不要太深，递归次数比较多
+		5.自定义事件，dom事件，及时销毁
+		 
+			防止内存泄露，越来越卡
+			
+			内存泄露就是系统回收不了那些分配出去但是又不使用的内存, 随着程序的运行,可以使用的内存就会越来越少,机子就会越来越卡
+			
+		6.data 层级不要太深，递归次数比较多
+		7. 合理使用异步组件
 	
 	其他层级：
 		
-		vue-loader 在开发环境做预编译
-		图片懒加载
-		使用ssr
+		8.vue-loader 在开发环境做预编译
+		9.图片懒加载
+		10.使用ssr
 		 

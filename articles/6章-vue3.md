@@ -9,12 +9,18 @@ vue3 升级内容
  proxy 存在浏览器兼容性问题，且不能使用 polyfill
  
  
-## 6-2 、6-3
+## 6-2 proxy基本使用-1
  
+ Object.defineProperty 缺点：
+ 	
+ 	深度监听需要一次性递归
+ 	无法监听新增属性/删除属性 Vue.set Vue.delete
+ 	无法原生监听数组，需要特殊处理
+ 	
 proxy 实现响应式
-
-get、set 中监听不到新增属性。
-可以监听到新增属性
+	
+	在 set 中监听到新增属性
+	在 deleteProperty 中监听到删除属性
 
 基本语法
 
@@ -28,9 +34,11 @@ var proxyData = new Proxy(data, {
 
 })
 ```
-
+## 6-3 proxy基本使用-2
 
 ```
+//所以receiver指向proxy对象。proxyData.
+
 const data = ['a', 'b', 'c']
 
 const proxyData = new Proxy(data, {
@@ -65,6 +73,25 @@ const proxyData = new Proxy(data, {
 ```
 
 
+对数组的监听：
+	
+	const data = ['a', 'b', 'c']
+	proxyData.push('d') 
+	
+	会打印出来：
+	get length
+	set 3 44
+	
+	proxyData.ownkeys: 0, 1, 2, length  
+	注意，length 也是 proxyData 的一个熟悉。
+	
+	proxyData[0]= 'aa';
+	会触发：  
+	set 0 aa  //表示可以通过数组长度设置数组值
+	
+	proxyData[3] = 'cc';
+	set 3 cc 
+ 
 
 ## 6-4
 

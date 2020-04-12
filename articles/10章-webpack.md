@@ -2,6 +2,14 @@
 
 不要背书，掉书袋，说说自己的理解
 
+hot: true
+
+	if(module.hot) {
+		module.hot.accept(['./math'], ()=> {
+		
+		})
+	}
+
 ## 10-1  webpack 常见面试题
 
 常见面试题：  
@@ -137,6 +145,10 @@ plugins: [
 开发环境下，不做改变。
 在线上环境下，抽离。  
 webpack.production.js 
+
+
+	理解style-loader， 是把css 代码放到 style中，这么一个作用
+	然后使用 MiniCssExtractPlugin，重新生成一个css 文件
 
 ```
 // 分离
@@ -289,14 +301,23 @@ webpack 会为 异步代码 单独生成一个文件。
 module： webpack 中一切皆模块， 只有可以被引用的文件，都是模块
 
 chunk： 多模块合并成的， 如 entry import() splitChunk
+
+> chunk三大来源
 	
-	是一系列模块文件生成的文件
+	entry
+	split 
+	import()
 	
-	比如 entry index.js 文件，把这个文件，和页面引用的 第三方库、公共代码 打包，生成 chunk
+	
+	
+是一系列模块文件生成的文件
+	
+	比如 entry index.js 文件，可能不止index.js 这一个文件，把这个页面引用的 其他文件，生成 chunk
 	
 	比如异步引入文件，import().then 生成一个 chunk
 	
 	比如，把所有的第三方库，生成一个 chunk
+	
 	把 公共模块，生成一个chunk
 	
 bundle： 最终的输出文件，在 dist 文件下生成的文件。
@@ -357,6 +378,17 @@ import 'moment/locale/zh-cn' // 手动引入中文语音包
 ignorePlugin 直接不引入，代码中没有
 
 noParse 引入，但是不打包, (不编译，不进行模块化分析
+
+
+比如 react.min.js 是已经模块化分析后的文件，不需要重新打包。
+
+```
+module: {
+
+	npParse: [/react\.min\.js$/]
+
+}
+```
 
 ## 10-11 happyPack 多进程打包
 
@@ -428,6 +460,16 @@ new ParallelUglifyPlugin({
 	开发环境 devServer 会有
 	生成环境，是不允许的
 
+	watch: true, // 开启监听，默认为 false
+	    watchOptions: {
+	        ignored: /node_modules/, // 忽略哪些
+	        // 监听到变化发生后会等300ms再去执行动作，防止文件更新太快导致重新编译频率太高
+	        // 默认为 300ms
+	        aggregateTimeout: 300,
+	        // 判断文件是否发生变化是通过不停的去询问系统指定文件有没有变化实现的
+	        // 默认每隔1000毫秒询问一次
+	        poll: 1000
+	    }
 
 热更新：
 
@@ -438,6 +480,13 @@ new ParallelUglifyPlugin({
 	热更新：新代码生效，网页不刷新，状态不丢失
 	
 webpack.dev.js
+
+几个步骤：
+	
+1. 引入HotModuleReplacementPlugin 插件
+2. 改变 entry 中 入口文件网址
+3. hot: true
+4. module.hot.accept
 
 ```
 const HotModuleReplacementPlugin = require('webpack/lib/HotModuleReplacementPlugin');
@@ -504,9 +553,66 @@ react.mainfest.json  // react内容的索引
 为了打包出 库和索引
 需要配置 dll文件的引入地址
 
+
+首先需要专门写一个  webpack.dll.js 文件
+
+```
+module.exports = {
+  mode: 'development',
+  // JS 执行入口文件
+  entry: {
+    // 把 React 相关模块的放到一个单独的动态链接库
+    react: ['react', 'react-dom']
+  },
+  output: {
+    // 输出的动态链接库的文件名称，[name] 代表当前动态链接库的名称，
+    // 也就是 entry 中配置的 react 和 polyfill
+    
+    filename: '[name].dll.js',
+    // 输出的文件都放到 dist 目录下
+    path: distPath,
+    // 存放动态链接库的全局变量名称，例如对应 react 来说就是 _dll_react
+    // 之所以在前面加上 _dll_ 是为了防止全局变量冲突
+    library: '_dll_[name]',
+  },
+  plugins: [
+    // 接入 DllPlugin
+    new DllPlugin({
+      // 动态链接库的全局变量名称，需要和 output.library 中保持一致
+      // 该字段的值也就是输出的 manifest.json 文件 中 name 字段的值
+      // 例如 react.manifest.json 中就有 "name": "_dll_react"
+      name: '_dll_[name]',
+      // 描述动态链接库的 manifest.json 文件输出时的文件名称
+      path: path.join(distPath, '[name].manifest.json'),
+    }),
+  ],
+}
+```
+
+在 package.json 文件中，我们配置，生成 dll 文件的命令
+
+```
+"scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack-dev-server --config build/webpack.dev.js",
+    "dll": "webpack --config build/webpack.dll.js"
+  },
+```
+
+然后我们在dist目录中，生成 react.dll.js 和 react.manifest.json
+文件
+
+
+使用：
+webpack.dev.js  文件：
+
 ```
 // 第一，引入 DllReferencePlugin
 const DllReferencePlugin = require('webpack/lib/DllReferencePlugin');
+
+...
+
+
 plugins: [
     new webpack.DefinePlugin({
         // window.ENV = 'production'
