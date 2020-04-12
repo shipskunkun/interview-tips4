@@ -603,6 +603,7 @@ module.exports = {
 文件
 
 
+
 使用：
 webpack.dev.js  文件：
 
@@ -643,7 +644,7 @@ manifest.json 在  plugins中配置，如上所示
 ## 10-14 webpack优化构建速度
 
 总结：可用于 生产环境  
-优化babel-loader, 缓存 + 排除文件夹  
+优化babel-loader, 缓存 + 排除文件夹 , include, exclude  
 IgnorePlugin   
 noParse   
 happyPack    
@@ -664,9 +665,11 @@ DllPlugin
 1. 小图base64 编码  
 + bundle 加 hash， 内容hash编码 [name].[contentHash:8].js
 + 懒加载，组件的异步加载
-+ 第三方代码，公共代码抽出， splitchunks
++ 第三方代码，公共代码抽出， splitchunks, cacheGroups
 + ignorePlugin, 打包代码更少
 + 使用 CDN 加速, 把打包文件，放到 cdn 服务器上去，让 publicPath 可访问
+	
+		作用：让所有静态文件 url 的前缀
 7. 使用production
 	
 		自动代码压缩
@@ -720,6 +723,9 @@ if(isDev) {
   //执行的时候才知道，里面的代码是否会执行
   // 执行的时候才知道 isDev 是否执行
   apiList = require('../config/api_dev.js')
+  
+  //编译时候回报错，只能静态引入
+  import apiList from '../config/api.js'
 }
 
 
@@ -773,6 +779,8 @@ console.log(str);
 	
 		.babelrc 配置
 		presets 和 plugins
+		
+		preset-env： 常用的plugin语法集合。
 		
 		//.babelrc
 		{
@@ -905,7 +913,7 @@ Array.prototype.includes = 100
 2. loader plugin 有什么区别
 
 	loader 模块转换器，如 less -> css  
-	plugin 扩展插件，如 htmlWebpackPlugin 
+	plugin 转换后再做扩展，扩展插件，如 htmlWebpackPlugin 
 	
 3. 哪些常见的 loader plugin
 
@@ -917,9 +925,9 @@ Array.prototype.includes = 100
 
 	plugin:
 	 
-	 DllPlugin
-	 HotModulePlugin
-	 MiniCssExtractPlugin
+	 DllPlugin	
+	 HotModulePlugin	
+	 MiniCssExtractPlugin	
 	 
 	  
 ## 10-25
