@@ -78,39 +78,93 @@ event 参数，自定义参数
 	
 	@click="incre(1, $event)"
 	
+	increment1(value, event) {
+        console.log('event', event, event.__proto__.constructor) // 是原生的 event 对象
+
+        console.log(event.target)  //实际点击的元素，始终指向事件发生时的元素
+
+        console.log(event.currentTarget) // 注意，事件是被注册到当前元素的，和 React 不一样
+        //绑定方法的元素，代理。指向事件所绑定的元素
+
+        this.num++
+
+        // 1. event 是原生的
+        // 2. 事件被挂载到当前元素
+        // 和 DOM 事件一样
+    }
+	
+	
+	
 	event.__proto__.constructor  是原生的 event 对象
 	
-	event.target  实际点击的元素，始终指向事件发生时的元素
+	event.target  
 	
-	event.currentTarget 绑定方法的元素，代理。指向事件所绑定的元素
+	event.currentTarget 
+	
+
+
 
 事件修饰符，按键修饰符  
 
 	v-on:click.stop   阻止事件冒泡
 	v-on:submit.prevent 阻止默认行为
+	v-on:click.capture 内部元素触发事件先在此处理，然后才交给内部元素进行处理 
 	
 事件被绑定到哪里
 
 
 ## 3-4 父子通信、自定义事件
 
-props 和 ```$emit```
+#### 1. props 和 ```$emit```
 
-组件生命周期
+```javascript
 
-组件间通讯 - 自定义事件
+子组件接受数据，传递数据
+props: {
+    // prop 类型和默认值
+    list: {
+        type: Array,
+        default() {
+            return []
+        }
+    }
+},
+
+methods: {
+    deleteItem(id) {
+        this.$emit('delete', id)
+    },
+}
+
+父组件中，注册事件
+<List :list="list" @delete="deleteHandler"/>
+methods: {
+    deleteHandler(id) {
+        this.list = this.list.filter(item => item.id !== id)
+    }
+},
+```
+
+
+
+#### 2.组件间通讯 - 自定义事件
 
 
 ```
 主要用于，兄弟、亲戚 组件之间通信
 	
-event = new Vue();
+//定义event.js
+import Vue from 'vue'
+export default new Vue()
+
 	
-// A 页面调用自定义事件
+// A 页面触发自定义事件
+import event from './event'
 event.$emit('onAddTitle', this.title)
    	
    	
 // B 页面，注册监听
+import event from './event'
 mounted() {
     // 绑定自定义事件， 这里绑定，事件名称，解绑自定义事件。
     event.$on('onAddTitle', this.addTitleHandler)
@@ -128,29 +182,35 @@ beforeDestroy() {
 ![img](https://segmentfault.com/img/bVbq6SZ)
 
 
-beforeCreate，实例初始化在这个生命周期遍历 data 对象下所有属性将其转化为 getter/setter,  无data,
+1. beforeCreate，实例初始化在这个生命周期遍历 data 对象下所有属性将其转化为 getter/setter,  无data, 
 
-created，实例已经被创建完毕 属性已经绑定 属性是可以操作的, 有data
+2. created，实例已经被创建完毕 属性已经绑定 属性是可以操作的, 有data。在控制台打印data ，可以访问到属性了
 
-beforeMount， 模板编译， el还未对数据进行渲染 还是不能操作dom
-
-created 和 mounted 有什么区别?  
-数据实例初始化，只在js上有值  
-
-mounted, 页面渲染完，数据挂载到 dom 上  
-beforeDestroy
-销毁绑定事件监听
+3. beforeMount， 模板编译， el还未对数据进行渲染 还是不能操作dom，这个时候不能访问 ```$ref, $el``` 原生dom
 
 
-beforeDestroy钩子函数在实例销毁之前调用。在这一步，实例仍然完全可用。
+4. mounted, 页面渲染完，数据挂载到 dom 上  ，控制台打印出dom。	
+	对象页面渲染完毕，可以ajax请求，或者绑定事件	
 
-destroyed钩子函数在Vue 实例销毁后调用。调用后，Vue 实例指示的所有东西都会解绑定，所有的事件监听器会被移除，所有的子实例也会被销毁。
+5. beforeUpdate， data被修改，dom没有修改	
+6. updated， 虚拟dom重新渲染并应用更新	
+
+7. beforeDestroy，销毁绑定事件监听	
+	
+ 	beforeDestroy钩子函数在实例销毁之前调用。在这一步，实例仍然完全可用。
+ 	
+ 	比如消除 setTimout 定时任务，绑定事件
+
+8. destroyed钩子函数在Vue 实例销毁后调用。调用后，Vue 实例指示的所有东西都会解绑定，所有的事件监听器会被移除，所有的子实例也会被销毁。
 
  
 父 beforeCreate > 父created > 父 beforMount , 子组件beforeCreate ， 子组件created > 子组件beforMount， 子组件mounted，  父组件 mounted
 
 
-销毁顺序？
+父组件 beforeupdate > 子组件beforeupdate > 子组件 updated> 父组件 updated
+
+
+
 
 
 	
@@ -189,19 +249,29 @@ Vue.component('base-checkbox', {
 ## 3-9 nextTick
 
 
-Vue 是异步渲染的框架
+首先Vue 是异步渲染的框架
 
-data 改变后，dom不会立刻渲染，如果此时你想拿到dom的一些属性，对dom的一些操作，或者数据，需要在 nextTick 中获取（这里注意，是对dom的操作才会有！）
+data 改变后，dom不会立刻渲染，如果此时你想拿到dom的一些属性，对dom的一些操作，或者数据，不是更新后的、实时的数据，如果我们想获取dom更新后的数据，需要在 nextTick 中获取（这里注意，是对dom的操作才会有！）
 
-nextTick 会在 Dom 渲染之后被触发，以获取最新的 DOM 节点
+nextTick 会在 Dom 更新之后被触发，以获取最新的 DOM 节点
 
 ```
 1. 异步渲染，$nextTick 待 DOM 渲染完再回调
 2. 页面渲染时会将 data 的修改做整合，多次 data 修改只会修改渲染一次
 
-this.$nextTick( ()=>{
+addItem() {
+        this.list.push(`${Date.now()}`)
+        this.list.push(`${Date.now()}`)
+        this.list.push(`${Date.now()}`)
 
-})
+        // 1. 异步渲染，$nextTick 待 DOM 渲染完再回调
+        // 3. 页面渲染时会将 data 的修改做整合，多次 data 修改只会渲染一次
+        this.$nextTick(() => {
+          // 获取 DOM 元素
+          const ulElem = this.$refs.ul1
+          console.log( ulElem.childNodes.length )
+        })
+    }
 ```
 
 ## 3-10 slot
@@ -250,20 +320,32 @@ this.$nextTick( ()=>{
 import 函数  
 按需组件  
 
-如果按照 
+如果按照 ,在文件头部引入文件，是同步加载组件
 
-```
+```JavaScript
+<script>
 import a from ''   // 同步引入组件，打包成一个文件
-```
-注册函数的时候，使用动态的方式引入, 什么时候用什么时候加载，什么时候不用，永远不会加载
 
-它是运行时执行，也就是说，什么时候运行到这一句，就会加载指定的模块。
+export default {
+
+}
+...
+
+```
+动态引入组件：
 
 ```
 components: {
 	FormDemo: ()=> import ('../components/FormDemo')
 }
 ```
+
+1. webpack把异步引入的组件单独划分成一个js文件
+2. import是运行时加载，什么时候运行到这一句，就会加载指定的模块。使用动态的方式引入, 什么时候用什么时候加载，什么时候不用，永远不会加载
+
+
+
+
 
 ## 3-13 keep-alive
 
@@ -272,7 +354,7 @@ vue 常见性能优化
 
 
 
-使用 v-if 显示组件，组件 是会销毁和重新渲染组件, 显示触发 mounted，false 触发 destroyed
+使用 v-if 显示组件，组件 是会销毁和重新渲染组件, 显示触发 mounted，v-if: false 时，会触发 destroyed
 
 ```
 <keepaliveStageA v-if="state === A"/>
@@ -288,7 +370,8 @@ vue 常见性能优化
 
 和 v-show 有什么区别？
 
-v-show 是通过  display 控制的
+v-show 是通过  display 控制的，是通过css控制			
+keep-alive 是把组件这个对象缓存起来，一个组件也是一个对象
 
 
 ## 3-14 mixin
@@ -302,7 +385,8 @@ v-show 是通过  display 控制的
 ### (面试问到了
 值为对象的选项，例如 methods、components 和 directives，将被合并为同一个对象。两个对象键名冲突时，取组件对象的键值对。
 
-methods 和 data 中，相同的可能会冲突，组件中会代替， mixin 中
+methods 和 data 中，相同的方法或者属性名可能会冲突，组件中会代替， mixin 中定义的属性或者方法。	
+
 而 mounted 中，不会覆盖, 会合并
 
 
@@ -337,9 +421,8 @@ export default {
 mixin 的问题：
 
 1. 变量来源不明（需要在 mixin 文件中找到），不利于阅读
-
 2. 多个 mixin 可能造成命名冲突， 后面定义的会覆盖前面定义的
-3.  mixin 和组件可能出现多对多的关系，复杂度较高
+3.  mixin 和组件可能出现多对多的关系，复杂度较高。一个组件可以引入多个 mixin, 一个mixin 可以被多个组件引入。
 
 
 ## 3-15 面试技巧
@@ -384,9 +467,34 @@ h5 history 模式: http://abc.com/user/20
 比如，访问 abc.com 返回 abc.html  
 访问 abc.com/user  返回 **/user.html  
 h5 ，无论访问什么路径，都返回 index.html  
+
+```javascript
+{
+  "hosting": {
+    "public": "dist",
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
+```
 所以需要配置 404 页面
 
+给个警告，因为这么做以后，你的服务器就不再返回 404 错误页面，因为对于所有路径都会返回 index.html 文件。为了避免这种情况，你应该在 Vue 应用里面覆盖所有的路由情况，然后在给出一个 404 页面。
 
+```javascript
+const router = new VueRouter({
+  mode: 'history',
+  routes: [
+    { path: '*', component: NotFoundComponent }
+  ]
+})
+```
+
+或者，如果你使用 Node.js 服务器，你可以用服务端路由匹配到来的 URL，并在没有匹配到路由的时候返回 404，以实现回退。
 
 动态路由：
 

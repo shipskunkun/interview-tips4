@@ -61,6 +61,8 @@ inpName.oninput = function () {
 };
 
 
+
+
 // 一级监听
 function defineReactive(target, key, value) {
     // 核心 API
@@ -107,34 +109,62 @@ function defineReactive(target, key, value) {
     })
 }
 
+
+
 function observer(target) {
     if (typeof target !== 'object' || target === null) {
         // 不是对象或数组
+        
         return target
     }
-
+   
     // 重新定义各个属性（for in 也可以遍历数组）
     for (let key in target) {
         defineReactive(target, key, target[key])
     }
 }
+
+
+// 准备数据
+const data = {
+    name: 'zhangsan',
+    age: 20,
+    info: {
+        address: '北京' // 需要深度监听
+    },
+    nums: [10, 20, 30]
+}
+
+// 监听数据
+observer(data)
+
+data.name = 'lisi'
+data.x = '100' // 新增属性，监听不到 —— 所以有 Vue.set
+delete data.name // 删除属性，监听不到 —— 所有已 
+data.info.address = '上海' // 深度监听
+
 ```
 
 深度监听和 普通监听的区别：  
 变化，在 设置新值 和 对每个属性 value 进行 observer 函数
 
+如果监听的属性值不是对象，return，否则，继续对这个属性深度监听。
 
 
 Obect.defineProperty   的缺点：
 	
-	深度监听，需要递归，一次性计算量大
+	1. 深度监听，需要递归，一次性计算量大
 	监听对象的属性，如果属性还是对象，需要深度监听，而且是递归
 	
-	无法监听新增、删除属性
+	2. 无法监听新增、删除属性
+		无法监听 data.x 添加属性， delete data.name 删除属性
 		如果data 添加了新的属性，是无法监听到的，需要使用 Vue.set
 		无法监听 delete data 中的属性, Vue.delete
 	
-	无法原生监听数组，需要特殊处理
+	3. 无法原生监听数组，需要特殊处理
+		既需要继承原生数据的特性，而且还能不修改原生数组，还需要监听
+		数据原生的 push、pop、shift、unshift 等这些方法，因为要触发 re-render
+		所以让新的数组的 __proto__ = Obeject.create(Array.prototype)
 	
 	
 ## 4-5 监听数组变化
@@ -223,7 +253,11 @@ children: [{
 ## 4-8 diff 算法
 	
 树的diff 时间复杂度是 O(n^3)
-
+	
+	遍历tree1, 
+	遍历tree2
+	排序
+	
  算法如何优化到O(n)
  	
  	1. 只比较同一层级，不跨级比较
@@ -233,6 +267,20 @@ children: [{
 	
 ## 深
 ## 4-9、深入 diff 算法
+
+* @param sel    选择器
+	
+		h('div#container.two,classes', {})
+		div#container.two,classes 就是 sel
+
+* @param data    绑定的数据
+
+* @param children    子节点数组
+
+* @param text    当前text节点内容
+
+* @param elm    对真实dom element的引用
+
 
 ``` 
 //sel: string || undefined  这是什么东西？？？
@@ -274,7 +322,7 @@ if(oldVnode === vnode) return
 问题： 
 	没有文本，就是一定有孩子么？是的。
 
-
+![img](https://images2018.cnblogs.com/blog/998023/201805/998023-20180519212357826-1474719173.png)
 
 
 1. 部分代码
@@ -318,7 +366,7 @@ if(oldVnode === vnode) return
 oldCh = a b c d	 
 newCh = b e d c 
 
-
+有增加、删除、排序的变化
 
 ## 4-13 vdom 和 diff 总结
 
