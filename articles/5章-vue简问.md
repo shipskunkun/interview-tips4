@@ -124,7 +124,7 @@
 	
 4. 何时使用异步组件？
 	
-		加载大组件
+		加载大组件 component{ top: ()=> import  }
 		
 		路由异步加载
 	
@@ -138,11 +138,11 @@
 
 1. 何时使用 beforeDestory
 
-		解绑自定义事件， event.$off
+		1. 解绑自定义事件， event.$off, 
 		
-		清楚定时器
+		2. 清楚定时器
 		
-		解绑自定义的dom 事件，addEventLisener, 如 window scroll
+		3. 解绑自定义的dom 事件，addEventLisener, 如 window scroll
 	
 2. 什么是作用域插槽？
 
@@ -247,7 +247,7 @@
 	
 		1.合理使用 v-show v-if
 		2. 合理使用 computed
-		3. v-for 时加key， 避免和 v-if 一起使用
+		3. v-for 时加key， 避免和 v-if 一起使用， vor-for的优先级比v-if 高，每次v-for时，v-if 需要重新计算
 		4. 合理使用keep-alive
 		
 		5.自定义事件，dom事件，及时销毁
@@ -261,7 +261,8 @@
 	
 	其他层级：
 		
-		8.vue-loader 在开发环境做预编译
-		9.图片懒加载
-		10.使用ssr
+		8. vue-loader 在开发环境做预编译
+		9. 前端通用性能优化，图片懒加载
+		10. 使用ssr
+		11. webpack层级优化
 		 

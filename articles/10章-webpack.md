@@ -27,6 +27,10 @@ hot: true
 ## 10-2、10-3 webpack 基本配置
 
 ```
+webpack.common.js  公共配置
+webpack.dev.js
+webpack.prod.js
+
 // webpack.dev.js 中
 //通过merge ，与公共配置， 合并起来
 
@@ -47,10 +51,27 @@ module.exports = smart(webpackCommonConf, {
 前端如何代理，解决跨域请求？
 	
 	proxy 代理，
-
-处理样式, loader 的样式是从后往前
 	
-	厂商前缀；合并css文件；  插入到html中，挂载到 header style 标签中
+	服务端给的接口是3000，本地的是8080，那么访问服务端的接口就跨域了，如何做？
+	
+	proxy: {
+        // 将本地 /api/xxx 代理到 localhost:3000/api/xxx
+        '/api': 'http://localhost:3000',
+
+        // 将本地 /api2/xxx 代理到 localhost:3000/xxx
+        '/api2': {
+            target: 'http://localhost:3000',
+            pathRewrite: {
+                '/api2': ''
+            }
+        }
+    }
+
+处理样式, loader 如果是多个的话，从后往前执行
+	
+	postcss-loader， 厂商前缀，浏览器兼容性
+	css-loader，合并css文件；  
+	style-loader，插入到html中，挂载到 header style 标签中
 	
 	{
 		test: /\.css$/,
@@ -75,7 +96,8 @@ module.exports = smart(webpackCommonConf, {
 	}
 	
 	
-打包生成文件
+打包生成文件，如果打包的文件变了，hash值就会变，文件的缓存就会失效。	
+如果js文件没变，请求的时候就会命中缓存。
 	
 	output: {
 		filename: 'bundle.[contentHash:8].js',
@@ -148,6 +170,9 @@ plugins: [
 在线上环境下，抽离。  
 webpack.production.js 
 
+
+>核心：
+>在 css loader 中，使用 MiniCssExtractPlugin.loader 取代style-loader
 
 	理解style-loader， 是把css 代码放到 style中，这么一个作用
 	然后使用 MiniCssExtractPlugin，重新生成一个css 文件
@@ -245,7 +270,7 @@ optimization: {
 	            minSize: 0,  // 公共模块的大小限制
 	            
 	            // 比如抽离的组件，如果在整个项目中只使用了一次，不要抽出来。
-	            minChunks: 2  // 公共模块最少复用过几次
+	            minChunks: 2  // 公共模块最少复用过几次, 假如只用过一次，没必要单独拆分出来
 	        }
 	    }
 	}
@@ -282,7 +307,9 @@ plugins: [
 异步：通过import 返回 promise 方式
 
 ```
-import imgFile from './img/1.png'
+import imgFile from './img/1.png'  //同步
+
+异步，使用 import() 方法
 
 setTimeout(()=> {
 	
@@ -337,24 +364,23 @@ bundle： 最终的输出文件，在 dist 文件下生成的文件。
 	
 	更小
 		因为uglifyjs不支持es6语法，所以用terser-webpack-plugin替代uglifyjs-webpack-plugin
-		TerserJSPlugin
-		
-		OptimizeCSSAssetsPlugin
-		ignorePlugin，不引入
+		TerserJSPlugin，js压缩
+		OptimizeCSSAssetsPlugin， css压缩
+		ignorePlugin，不引入无用模块，比如引入 moment日期内库，默认引入所有语音js代码，只引入中文、英文即可
 		noparse，引入不编译, 不进行模块化分析
 	
 	更快
-		happyPack  多进程
-		paralleUglify  多进程压缩
+		happyPack  多进程打包，注意不是多线程。 
+		paralleUglify  多进程压缩js
 	
 	缓存
-		优化 babel-loader，cacheDirectory，include，exclude，不用每次重新编译
+		优化 babel-loader，开启缓存，cacheDirectory，明确范围，include，exclude，不用每次重新编译
 		DllPlugin  比较大的第三方库，不用每次打包都打包一次
 	
 	性能
 		自动刷新
 		热更新  浏览器不刷新，代码已生效
-		
+	
 	
 
 优化babel-loader
@@ -366,16 +392,18 @@ bundle： 最终的输出文件，在 dist 文件下生成的文件。
         include: srcPath,  // include 和 exclude 只写一个就可以
         exclude: /node_modules/  排除范围
     },
+
+
 	
-	
-	
-## 10-10 ignorePlugin
+## 10-10 ignorePlugin、noparse
 	
 moment.js 前端使用的处理日期的内库
 	
 默认会引入所有语音js代码，代码过大
 
-如何只引入中文？
+如何只引入中文和英文？
+
+
 
 ```	
 plugins:[	
@@ -394,17 +422,27 @@ ignorePlugin 直接不引入，代码中没有
 noParse 引入，但是不打包, (不编译，不进行模块化分析
 
 
+
+
+#### noparse 避免重复打包
+
+一般 min.js 是模块化处理过的文件，无需在做模块化分析
+
 比如 react.min.js 是已经模块化分析后的文件，不需要重新打包。
 
-```
+
+```javascript
+
 module: {
 
-	npParse: [/react\.min\.js$/]
+noParse: [/react\.min\.js$/]
 
 }
-```
 
-## 10-11 happyPack 多进程打包
+
+```	
+
+## 10-11 happyPack 多进程打包、 paralleUglify 多进程压缩js
 
 js 单线程，开启多进程打包
 
@@ -551,8 +589,8 @@ devServer: {
 
 
 + webpack 已经内置 DllPlugin 支持
-+ DllPlugin : 打包出dll 文件
-+ DllReferencePlugin: 使用 dll 文件
++ 通过DllPlugin : 打包出dll 文件
++ 通过DllReferencePlugin: 使用 dll 文件
 
 
 
@@ -743,6 +781,8 @@ commonjs 动态引入，执行时引入
 	打包的时候不知道是啥，只有执行的时候才能引用
 	
 只有 es6 module 才能静态分析， 实现 tree shaking
+
+webpack打包的时候，代码还没有执行，只是静态分析，代码还没有正式被使用
 
 ```
 let apiList = require('../config/api.js')

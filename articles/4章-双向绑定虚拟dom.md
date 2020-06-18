@@ -424,6 +424,8 @@ _v  createVnode
 _s  toString
 ```
 
+compiler 将模板编译成 render 函数
+
 执行 返回的 render 函数， 得到 vnode
 
 基于 vnode 再执行patch 和 diff
@@ -438,7 +440,7 @@ const template = `<p>{{flag ? message : 'no message found'}}</p>`
 with(this){return _c('p',[_v(_s(flag ? message : 'no message found'))])}
 ```
 
-```
+``` JavaScript
 //属性和动态属性
 const template = `
      <div id="div1" class="container">
@@ -521,10 +523,11 @@ react 一直使用 render， 没有模板
 
 ####问道了！
 
+模板中没有使用的属性，不会被收集依赖。
 
 初次渲染：
 	
-	1. 解析模板为 render 函数
+	1. 解析模板为 render 函数, 生成虚拟dom
 	2. 触发响应式，监听 data 属性  getter、setter
 		
 
@@ -544,6 +547,8 @@ react 一直使用 render， 没有模板
 
 
 流程图
+
+从黄色的框开始看。
 
 ![img](https://cn.vuejs.org/images/data.png)
 
@@ -623,9 +628,14 @@ window.onpopstate
 http://a.com/xx
 
 跳转到
-http://a.com/xx/yy 不熟悉也
+http://a.com/xx/yy 不刷新页面
 
-使用 putState 方式跳转，页面不会刷新
+
+
+1. 使用 putState 方式跳转，页面不会刷新, h5  history.pushState无刷新改变url
+2. 当用户在浏览器点击进行后退、前进，或者在js中调用histroy.back()，history.go()，history.forward()等，会触发popstate事件；但pushState、replaceState不会触发这个事件。
+
+
 
 ```
  // 页面初次加载，获取 path
@@ -654,7 +664,7 @@ window.onpopstate = (event) => { // 重要！！
 
 
 
-to B , 推荐使用 hash
+to B , 推荐使用 hash，简单易用，对url规范不敏感
 
 to C， 考虑使用 h5 history, 但是需要服务端支持
 
