@@ -15,7 +15,6 @@
 
 组件化将页面视为一个容器，页面上各个独立部分例如：头部、导航、焦点图、侧边栏、底部等视为独立组件，不同的页面根据内容的需要，去盛放相关组件即可组成完整的页面。
 
-
 组件是具体的：按照一些小功能的通用性和可复用性来抽象组件
 组件化更多的关注UI部分，比如用户看到的弹出框，页脚，确认按钮等，这些组件可以组合成新的组件，又可以和其他组件组合组合成新的组件
 
@@ -27,7 +26,7 @@
 
 
 asp、jsp、php 已经有组件化了
- 
+
 传统组件，只是静态渲染，更新还需要依赖于操作 DOM   
 数据驱动视图，vue MVVM  
 数据驱动视图，react setState  
@@ -38,6 +37,15 @@ asp、jsp、php 已经有组件化了
 
 如何起一个服务？  
 在目标文件夹下：  
+
+
+
+```js
+cnpm i http-server -g
+http-server -p 8001
+```
+
+
 
 #### 区别，面试问到了
 
@@ -165,10 +173,11 @@ Obect.defineProperty   的缺点：
 		既需要继承原生数据的特性，而且还能不修改原生数组，还需要监听
 		数据原生的 push、pop、shift、unshift 等这些方法，因为要触发 re-render
 		所以让新的数组的 __proto__ = Obeject.create(Array.prototype)
-	
-	
+
+
+​	
 ## 4-5 监听数组变化
- 
+
  	需要对监听的数组，做深拷贝
  	
  	为啥要这么做，可以监听，数组的 push、pop 等方法，对数组的修改，更新视图
@@ -210,7 +219,7 @@ Obect.defineProperty   的缺点：
     }
 })
 ```
-	
+
 
 ## 4-6、4-7 虚拟dom, virtual dom
 
@@ -251,13 +260,18 @@ children: [{
 ```
 
 ## 4-8 diff 算法
-	
+
 树的diff 时间复杂度是 O(n^3)
 	
+
+为什么O(n^3),  编辑距离的时间复杂度。
+
+
+
 	遍历tree1, 
 	遍历tree2
 	排序
-	
+
  算法如何优化到O(n)
  	
  	1. 只比较同一层级，不跨级比较
@@ -346,9 +360,9 @@ if(oldVnode === vnode) return
 			removeVondes(elm, oldCh, ...)  // 移除旧节点 孩子
 		}
 		api.setTextContent(elm, vnode.text)  // 把新旧节点，text 设成一样
-		
- 
- 
+	
+
+
  核心patch:
  	
 	 	两个都有孩子，比较孩子
@@ -529,7 +543,7 @@ react 一直使用 render， 没有模板
 	
 	1. 解析模板为 render 函数, 生成虚拟dom
 	2. 触发响应式，监听 data 属性  getter、setter
-		
+
 
 		通过 with 语法，已经获得了 data 的属性，触发 getter
 		前提：在template 中出现的 属性，才会触发 getter

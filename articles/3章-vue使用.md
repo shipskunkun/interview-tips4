@@ -20,13 +20,17 @@ deep, 为什么不能打印出old值？
 		computed 有缓存，data 不变不会重新计算
 
 3. watch 如何深度监听？
+
+当属性变化时候，可以监听到的意思，如果不加 deep:true 如何？
+
+当对象不添加， deep: true 的时候，属性变化是监听不到的
 	
 		deep: true
 		handler(oldval, val) {}
 
-	###watch 如果监听引用类型，是拿不到 oldVal 的 ？？？ 这是什么意思
-	
-	```
+### watch 如果监听引用类型，是拿不到 oldVal 的 ？？？ 这是什么意思
+
+```js
 	var vm = new Vue({
         el: '#app',
         data: {
@@ -50,8 +54,23 @@ deep, 为什么不能打印出old值？
             }
         }
     })
-	```
-	
+```
+
+怎么改：
+
+可以改成：
+	'info.city': {}
+
+或者可以通过 计算属性	
+
+	computed: {
+	    getName: function() {
+	    	return this.info.name
+	    }
+	}	
+
+
+​	
 4. 动态绑定 class 的几种写法
 
 	```
@@ -79,28 +98,29 @@ event 参数，自定义参数
 	@click="incre(1, $event)"
 	
 	increment1(value, event) {
-        console.log('event', event, event.__proto__.constructor) // 是原生的 event 对象
-
-        console.log(event.target)  //实际点击的元素，始终指向事件发生时的元素
-
-        console.log(event.currentTarget) // 注意，事件是被注册到当前元素的，和 React 不一样
-        //绑定方法的元素，代理。指向事件所绑定的元素
-
-        this.num++
-
-        // 1. event 是原生的
-        // 2. 事件被挂载到当前元素
-        // 和 DOM 事件一样
-    }
+	    console.log('event', event, event.__proto__.constructor) // 是原生的 event 对象
 	
+	    console.log(event.target)  //实际点击的元素，始终指向事件发生时的元素
 	
+	    console.log(event.currentTarget) // 注意，事件是被注册到当前元素的，和 React 不一样
+	    //绑定方法的元素，代理。指向事件所绑定的元素
 	
+	    this.num++
+	
+	    // 1. event 是原生的
+	    // 2. 事件被挂载到当前元素
+	    // 和 DOM 事件一样
+	}
+
+
+​	
+​	
 	event.__proto__.constructor  是原生的 event 对象
 	
 	event.target  
 	
 	event.currentTarget 
-	
+
 
 
 
@@ -109,7 +129,7 @@ event 参数，自定义参数
 	v-on:click.stop   阻止事件冒泡
 	v-on:submit.prevent 阻止默认行为
 	v-on:click.capture 内部元素触发事件先在此处理，然后才交给内部元素进行处理 
-	
+
 事件被绑定到哪里
 
 
@@ -150,6 +170,8 @@ methods: {
 #### 2.组件间通讯 - 自定义事件
 
 
+
+
 ```
 主要用于，兄弟、亲戚 组件之间通信
 	
@@ -173,7 +195,23 @@ beforeDestroy() {
     // 及时销毁，否则可能造成内存泄露
     event.$off('onAddTitle', this.addTitleHandler)
 }
-```	
+```
+
+#### vue中利用 bus 做组件间传值
+
+有两种方法，一种是在每个使用该页面的地方，都 导入事件对象
+
+另外一种是在main.js 中挂到 prototype上
+
+```js
+import Vue from 'vue'
+export default new Vue()
+
+import event from './event'
+
+let bus = import bus from './event'
+Vue.prototype.$bus = bus
+```
 
 
 
@@ -183,27 +221,30 @@ beforeDestroy() {
 
 
 1. beforeCreate，实例初始化在这个生命周期遍历 data 对象下所有属性将其转化为 getter/setter,  无data, 
+2. created，实例已经被创建完毕 属性已经绑定 属性是可以操作的, 有data。在控制台打印data ，可以访问到属性了。**Vue实例初始化完毕，但是还没开始渲染。**
+3. beforeMount， 模板编译， el还未对数据进行渲染 还是不能操作dom，这个时候不能访问 `$ref, $el` 原生dom
 
-2. created，实例已经被创建完毕 属性已经绑定 属性是可以操作的, 有data。在控制台打印data ，可以访问到属性了
+4. mounted, **页面渲染完**，数据挂载到 dom 上  ，控制台打印出dom。	**对象页面渲染完毕，可以ajax请求，或者绑定事件**	
 
-3. beforeMount， 模板编译， el还未对数据进行渲染 还是不能操作dom，这个时候不能访问 ```$ref, $el``` 原生dom
+5. beforeUpdate， **data被修改，dom没有修改**	
 
-
-4. mounted, 页面渲染完，数据挂载到 dom 上  ，控制台打印出dom。	
-	对象页面渲染完毕，可以ajax请求，或者绑定事件	
-
-5. beforeUpdate， data被修改，dom没有修改	
-6. updated， 虚拟dom重新渲染并应用更新	
+6. updated， **虚拟dom重新渲染并应用更新**	
 
 7. beforeDestroy，销毁绑定事件监听	
-	
- 	beforeDestroy钩子函数在实例销毁之前调用。在这一步，实例仍然完全可用。
- 	
+
+ 	beforeDestroy钩子函数在实例销毁之前调用。在这一步，实例仍然完全可用。 	
+
  	比如消除 setTimout 定时任务，绑定事件
 
 8. destroyed钩子函数在Vue 实例销毁后调用。调用后，Vue 实例指示的所有东西都会解绑定，所有的事件监听器会被移除，所有的子实例也会被销毁。
 
- 
+
+
+**创建是从外到内的，但是渲染时从内到外的**，子组件渲染完，父组件才渲染完毕
+
+
+
+
 父 beforeCreate > 父created > 父 beforMount , 子组件beforeCreate ， 子组件created > 子组件beforMount， 子组件mounted，  父组件 mounted
 
 
@@ -213,31 +254,42 @@ beforeDestroy() {
 
 
 
-	
+
 ## 3-7 略
 ## 3-8 v-model
 
 一个组件上的 v-model 默认会利用名为 value 的 prop 和名为 input 的事件
 
 ```
-<base-checkbox v-model="lovingVue"></base-checkbox>
+<CustomVModel v-model="name"/>
 
-Vue.component('base-checkbox', {
-  model: {
-    prop: 'checked1',  // model 中的prop 和 props 对应起来
-    event: 'change2'  // event 和 emit 中 对应
-  },
-  props: {
-    checked1: Boolean
-  },
-  template: `
-    <input
-      type="checkbox"
-      v-bind:checked="checked1"  // 组件中的 input不能使用 v-model,使用的是 v-bind
-      v-on:change="$emit('change2', $event.target.checked)"
+<template>
+    <!-- 例如：vue 颜色选择 -->
+    <input type="text"
+        :value="text1"
+        @input="$emit('change1', $event.target.value)"
     >
-  `
-})
+    <!--
+        1. 上面的 input 使用了 :value 而不是 v-model
+        2. 上面的 change1 和 model.event1 要对应起来
+        3. text1 属性对应起来
+    -->
+</template>
+
+<script>
+export default {
+    model: {
+        prop: 'text1', // 对应 props text1
+        event: 'change1'
+    },
+    props: {
+        text1: String,
+        default() {
+            return ''
+        }
+    }
+}
+</script>
 ```
 
 注意点3：
@@ -245,15 +297,19 @@ Vue.component('base-checkbox', {
 	1. 组件中的 input不能使用 v-model,使用的是 v-bind
 	2. model 中的prop 和 props 对应起来
 	3. event 和 emit 中 对应
-	
+
 ## 3-9 nextTick
 
 
 首先Vue 是异步渲染的框架
 
-data 改变后，dom不会立刻渲染，如果此时你想拿到dom的一些属性，对dom的一些操作，或者数据，不是更新后的、实时的数据，如果我们想获取dom更新后的数据，需要在 nextTick 中获取（这里注意，是对dom的操作才会有！）
+**data 改变后，dom不会立刻渲染**，如果此时你想拿到dom的一些属性，对dom的一些操作，或者数据，不是更新后的、实时的数据，如果我们想获取dom更新后的数据，需要在 nextTick 中获取（这里注意，是对dom的操作才会有！）
 
-nextTick 会在 Dom 更新之后被触发，以获取最新的 DOM 节点
+**nextTick 会在 Dom 更新之后被触发，以获取最新的 DOM 节点**
+
+
+
+**1.nextTick 是在 dom 渲染之后完成的。2. 涉及对DOM 的操作**
 
 ```
 1. 异步渲染，$nextTick 待 DOM 渲染完再回调
@@ -388,8 +444,6 @@ keep-alive 是把组件这个对象缓存起来，一个组件也是一个对象
 methods 和 data 中，相同的方法或者属性名可能会冲突，组件中会代替， mixin 中定义的属性或者方法。	
 
 而 mounted 中，不会覆盖, 会合并
-
-
 
 
 
