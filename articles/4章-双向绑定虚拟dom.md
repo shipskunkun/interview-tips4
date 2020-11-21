@@ -15,7 +15,6 @@
 
 组件化将页面视为一个容器，页面上各个独立部分例如：头部、导航、焦点图、侧边栏、底部等视为独立组件，不同的页面根据内容的需要，去盛放相关组件即可组成完整的页面。
 
-
 组件是具体的：按照一些小功能的通用性和可复用性来抽象组件
 组件化更多的关注UI部分，比如用户看到的弹出框，页脚，确认按钮等，这些组件可以组合成新的组件，又可以和其他组件组合组合成新的组件
 
@@ -27,7 +26,7 @@
 
 
 asp、jsp、php 已经有组件化了
- 
+
 传统组件，只是静态渲染，更新还需要依赖于操作 DOM   
 数据驱动视图，vue MVVM  
 数据驱动视图，react setState  
@@ -38,6 +37,15 @@ asp、jsp、php 已经有组件化了
 
 如何起一个服务？  
 在目标文件夹下：  
+
+
+
+```js
+cnpm i http-server -g
+http-server -p 8001
+```
+
+
 
 #### 区别，面试问到了
 
@@ -59,6 +67,8 @@ function observe() {
 inpName.oninput = function () {
     obj.name = this.value;
 };
+
+
 
 
 // 一级监听
@@ -107,38 +117,67 @@ function defineReactive(target, key, value) {
     })
 }
 
+
+
 function observer(target) {
     if (typeof target !== 'object' || target === null) {
         // 不是对象或数组
+        
         return target
     }
-
+   
     // 重新定义各个属性（for in 也可以遍历数组）
     for (let key in target) {
         defineReactive(target, key, target[key])
     }
 }
+
+
+// 准备数据
+const data = {
+    name: 'zhangsan',
+    age: 20,
+    info: {
+        address: '北京' // 需要深度监听
+    },
+    nums: [10, 20, 30]
+}
+
+// 监听数据
+observer(data)
+
+data.name = 'lisi'
+data.x = '100' // 新增属性，监听不到 —— 所以有 Vue.set
+delete data.name // 删除属性，监听不到 —— 所有已 
+data.info.address = '上海' // 深度监听
+
 ```
 
 深度监听和 普通监听的区别：  
 变化，在 设置新值 和 对每个属性 value 进行 observer 函数
 
+如果监听的属性值不是对象，return，否则，继续对这个属性深度监听。
 
 
 Obect.defineProperty   的缺点：
 	
-	深度监听，需要递归，一次性计算量大
+	1. 深度监听，需要递归，一次性计算量大
 	监听对象的属性，如果属性还是对象，需要深度监听，而且是递归
 	
-	无法监听新增、删除属性
+	2. 无法监听新增、删除属性
+		无法监听 data.x 添加属性， delete data.name 删除属性
 		如果data 添加了新的属性，是无法监听到的，需要使用 Vue.set
 		无法监听 delete data 中的属性, Vue.delete
 	
-	无法原生监听数组，需要特殊处理
-	
-	
+	3. 无法原生监听数组，需要特殊处理
+		既需要继承原生数据的特性，而且还能不修改原生数组，还需要监听
+		数据原生的 push、pop、shift、unshift 等这些方法，因为要触发 re-render
+		所以让新的数组的 __proto__ = Obeject.create(Array.prototype)
+
+
+​	
 ## 4-5 监听数组变化
- 
+
  	需要对监听的数组，做深拷贝
  	
  	为啥要这么做，可以监听，数组的 push、pop 等方法，对数组的修改，更新视图
@@ -180,7 +219,7 @@ Obect.defineProperty   的缺点：
     }
 })
 ```
-	
+
 
 ## 4-6、4-7 虚拟dom, virtual dom
 
@@ -221,8 +260,17 @@ children: [{
 ```
 
 ## 4-8 diff 算法
-	
+
 树的diff 时间复杂度是 O(n^3)
+	
+
+为什么O(n^3),  编辑距离的时间复杂度。
+
+
+
+	遍历tree1, 
+	遍历tree2
+	排序
 
  算法如何优化到O(n)
  	
@@ -233,6 +281,20 @@ children: [{
 	
 ## 深
 ## 4-9、深入 diff 算法
+
+* @param sel    选择器
+	
+		h('div#container.two,classes', {})
+		div#container.two,classes 就是 sel
+
+* @param data    绑定的数据
+
+* @param children    子节点数组
+
+* @param text    当前text节点内容
+
+* @param elm    对真实dom element的引用
+
 
 ``` 
 //sel: string || undefined  这是什么东西？？？
@@ -274,7 +336,7 @@ if(oldVnode === vnode) return
 问题： 
 	没有文本，就是一定有孩子么？是的。
 
-
+![img](https://images2018.cnblogs.com/blog/998023/201805/998023-20180519212357826-1474719173.png)
 
 
 1. 部分代码
@@ -298,9 +360,9 @@ if(oldVnode === vnode) return
 			removeVondes(elm, oldCh, ...)  // 移除旧节点 孩子
 		}
 		api.setTextContent(elm, vnode.text)  // 把新旧节点，text 设成一样
-		
- 
- 
+	
+
+
  核心patch:
  	
 	 	两个都有孩子，比较孩子
@@ -318,7 +380,7 @@ if(oldVnode === vnode) return
 oldCh = a b c d	 
 newCh = b e d c 
 
-
+有增加、删除、排序的变化
 
 ## 4-13 vdom 和 diff 总结
 
@@ -376,6 +438,8 @@ _v  createVnode
 _s  toString
 ```
 
+compiler 将模板编译成 render 函数
+
 执行 返回的 render 函数， 得到 vnode
 
 基于 vnode 再执行patch 和 diff
@@ -390,7 +454,7 @@ const template = `<p>{{flag ? message : 'no message found'}}</p>`
 with(this){return _c('p',[_v(_s(flag ? message : 'no message found'))])}
 ```
 
-```
+``` JavaScript
 //属性和动态属性
 const template = `
      <div id="div1" class="container">
@@ -473,12 +537,13 @@ react 一直使用 render， 没有模板
 
 ####问道了！
 
+模板中没有使用的属性，不会被收集依赖。
 
 初次渲染：
 	
-	1. 解析模板为 render 函数
+	1. 解析模板为 render 函数, 生成虚拟dom
 	2. 触发响应式，监听 data 属性  getter、setter
-		
+
 
 		通过 with 语法，已经获得了 data 的属性，触发 getter
 		前提：在template 中出现的 属性，才会触发 getter
@@ -496,6 +561,8 @@ react 一直使用 render， 没有模板
 
 
 流程图
+
+从黄色的框开始看。
 
 ![img](https://cn.vuejs.org/images/data.png)
 
@@ -575,9 +642,14 @@ window.onpopstate
 http://a.com/xx
 
 跳转到
-http://a.com/xx/yy 不熟悉也
+http://a.com/xx/yy 不刷新页面
 
-使用 putState 方式跳转，页面不会刷新
+
+
+1. 使用 putState 方式跳转，页面不会刷新, h5  history.pushState无刷新改变url
+2. 当用户在浏览器点击进行后退、前进，或者在js中调用histroy.back()，history.go()，history.forward()等，会触发popstate事件；但pushState、replaceState不会触发这个事件。
+
+
 
 ```
  // 页面初次加载，获取 path
@@ -606,7 +678,7 @@ window.onpopstate = (event) => { // 重要！！
 
 
 
-to B , 推荐使用 hash
+to B , 推荐使用 hash，简单易用，对url规范不敏感
 
 to C， 考虑使用 h5 history, 但是需要服务端支持
 
