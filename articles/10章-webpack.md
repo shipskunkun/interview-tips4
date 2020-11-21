@@ -9,6 +9,8 @@ hot: true
 		
 		})
 	}
+	
+10-24， 为什么要构建工具
 
 ## 10-1  webpack 常见面试题
 
@@ -305,7 +307,7 @@ chunk： 多模块合并成的， 如 entry import() splitChunk
 > chunk三大来源
 	
 	entry
-	split 
+	splitChunks
 	import()
 	
 	
@@ -333,14 +335,26 @@ bundle： 最终的输出文件，在 dist 文件下生成的文件。
 	
 构建速度：
 	
-	优化 babel-loader
-	ignorePlugin
-	noparse
-	happyPack  多进程
-	paralleUglify  多进程压缩
-	自动刷新
-	热更新  浏览器不刷新，代码已生效
-	DllPlugin  比较大的第三方库，不用每次打包都打包一次
+	更小
+		因为uglifyjs不支持es6语法，所以用terser-webpack-plugin替代uglifyjs-webpack-plugin
+		TerserJSPlugin
+		
+		OptimizeCSSAssetsPlugin
+		ignorePlugin，不引入
+		noparse，引入不编译, 不进行模块化分析
+	
+	更快
+		happyPack  多进程
+		paralleUglify  多进程压缩
+	
+	缓存
+		优化 babel-loader，cacheDirectory，include，exclude，不用每次重新编译
+		DllPlugin  比较大的第三方库，不用每次打包都打包一次
+	
+	性能
+		自动刷新
+		热更新  浏览器不刷新，代码已生效
+		
 	
 
 优化babel-loader
@@ -461,15 +475,15 @@ new ParallelUglifyPlugin({
 	生成环境，是不允许的
 
 	watch: true, // 开启监听，默认为 false
-	    watchOptions: {
-	        ignored: /node_modules/, // 忽略哪些
-	        // 监听到变化发生后会等300ms再去执行动作，防止文件更新太快导致重新编译频率太高
-	        // 默认为 300ms
-	        aggregateTimeout: 300,
-	        // 判断文件是否发生变化是通过不停的去询问系统指定文件有没有变化实现的
-	        // 默认每隔1000毫秒询问一次
-	        poll: 1000
-	    }
+    watchOptions: {
+        ignored: /node_modules/, // 忽略哪些
+        // 监听到变化发生后会等300ms再去执行动作，防止文件更新太快导致重新编译频率太高
+        // 默认为 300ms
+        aggregateTimeout: 300,
+        // 判断文件是否发生变化是通过不停的去询问系统指定文件有没有变化实现的
+        // 默认每隔1000毫秒询问一次
+        poll: 1000
+    }
 
 热更新：
 
@@ -644,16 +658,22 @@ manifest.json 在  plugins中配置，如上所示
 ## 10-14 webpack优化构建速度
 
 总结：可用于 生产环境  
-优化babel-loader, 缓存 + 排除文件夹 , include, exclude  
-IgnorePlugin   
-noParse   
-happyPack    
-parallelUglifyPlugin 必须生产缓存  
 
-不可用于生产环境
-自动刷新  
-热更新  
-DllPlugin
+```
+更小
+	IgnorePlugin   
+	noParse  
+更快
+	happyPack    
+	parallelUglifyPlugin 必须生产缓存  
+缓存
+	优化babel-loader, 缓存 + 排除文件夹 , include, exclude  
+```
+不可用于生产环境  
+
+	自动刷新  
+	热更新  
+	DllPlugin
 
 ## 10-15 性能优化——产出代码
 
@@ -662,29 +682,36 @@ DllPlugin
 + 速度更快，内存使用更快
 
 
-1. 小图base64 编码  
-+ bundle 加 hash， 内容hash编码 [name].[contentHash:8].js
-+ 懒加载，组件的异步加载
-+ 第三方代码，公共代码抽出， splitchunks, cacheGroups
-+ ignorePlugin, 打包代码更少
-+ 使用 CDN 加速, 把打包文件，放到 cdn 服务器上去，让 publicPath 可访问
+```
+
+代码分割
+	第三方代码，公共代码抽出， splitchunks, cacheGroups
+
+tree shaking
+	使用production
 	
-		作用：让所有静态文件 url 的前缀
-7. 使用production
+	自动代码压缩
+
+异步加载
+	懒加载，组件的异步加载
 	
-		自动代码压缩
-		
-8. Scope Hosting
-
-
-
-	```
+优化
+	bundle 加 hash， 内容hash编码 [name].[contentHash:8].js
+	小图base64 编码  		
+	Scope Hosting
+更小
+	ignorePlugin, 打包代码更少
+	
+更快
+	使用 CDN 加速, 把打包文件，放到 cdn 服务器上去，让 publicPath 可访问
+	作用：让所有静态文件 url 的前缀
+	
 	output: {
 	    filename: '[name].[contentHash:8].js', // name 即多入口时 entry 的 key
 	    path: distPath,
 	    // publicPath: 'http://cdn.abc.com'  // 修改所有静态文件 url 的前缀（如 cdn 域名），这里暂时用不到
 	},
-	```
+```	
 
 
 ## 10-16  tree shaking
@@ -842,18 +869,33 @@ npx babel index.js // npx 中，使用 babel 转为 es5 语法
 
 babel-polyfill 缺点：
 
+想要在全局环境下使用 promise， 得在全局环境下，添加API。
+
+
 ```
 // 污染全局环境
-window.Promise1 = function() {}
-Array.prototype.includes1 = function () {}
+window.Promise = function() {}
+Array.prototype.includes = function () {}
+```
 
-// 使用方
+问题出在：如果想做成一个库，给别人使用，就不能使用 ES6 官方定义的 名字，防止冲突。
+
+
+```
+// 使用方，由于某些请求，重新定义全局的 Promise 呀
+
 window.Promise = 'abc'
 Array.prototype.includes = 100
- 
+```
+
+解决：	
+把index.js 中 promise 等，变成内部 _promise
+
+	_promise
+	_includes
 
 
-
+```
 "plugins": [
     [
         "@babel/plugin-transform-runtime",
