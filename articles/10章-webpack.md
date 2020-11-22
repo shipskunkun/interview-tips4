@@ -9,7 +9,7 @@ hot: true
 		
 		})
 	}
-	
+
 10-24， 为什么要构建工具
 
 ## 10-1  webpack 常见面试题
@@ -22,7 +22,7 @@ hot: true
 	webpack如何实现懒加载？  
 	webpack常见性能优化  
 	bebel-runtime 和 babel-polyfill 区别  
-	
+
 
 ## 10-2、10-3 webpack 基本配置
 
@@ -55,17 +55,17 @@ module.exports = smart(webpackCommonConf, {
 	服务端给的接口是3000，本地的是8080，那么访问服务端的接口就跨域了，如何做？
 	
 	proxy: {
-        // 将本地 /api/xxx 代理到 localhost:3000/api/xxx
-        '/api': 'http://localhost:3000',
-
-        // 将本地 /api2/xxx 代理到 localhost:3000/xxx
-        '/api2': {
-            target: 'http://localhost:3000',
-            pathRewrite: {
-                '/api2': ''
-            }
-        }
-    }
+	    // 将本地 /api/xxx 代理到 localhost:3000/api/xxx
+	    '/api': 'http://localhost:3000',
+	
+	    // 将本地 /api2/xxx 代理到 localhost:3000/xxx
+	    '/api2': {
+	        target: 'http://localhost:3000',
+	        pathRewrite: {
+	            '/api2': ''
+	        }
+	    }
+	}
 
 处理样式, loader 如果是多个的话，从后往前执行
 	
@@ -80,7 +80,7 @@ module.exports = smart(webpackCommonConf, {
 		test: /\.less$/,
 		loader:['style-loader','css-loader','less-loader']
 	}
-	
+
 打包图片
 
 	图片小于5kb， 打包到 img1 文件夹下，base64格式产出， 
@@ -94,11 +94,12 @@ module.exports = smart(webpackCommonConf, {
 			outputPath: '/img1/'
 		}
 	}
-	
-	
+
+
+​	
 打包生成文件，如果打包的文件变了，hash值就会变，文件的缓存就会失效。	
 如果js文件没变，请求的时候就会命中缓存。
-	
+​	
 	output: {
 		filename: 'bundle.[contentHash:8].js',
 		path: distPath
@@ -109,9 +110,10 @@ module.exports = smart(webpackCommonConf, {
 	bundle.12fjdggg.js
 	img1
 		gsgsgdgggsdshwrhhklbdhh.png
-	
-	
-	
+
+
+​	
+​	
 ## 10-4 配置多入口
 
 
@@ -166,7 +168,7 @@ plugins: [
 
 
 
-开发环境下，不做改变。
+开发环境下，可以不做改变。
 在线上环境下，抽离。  
 webpack.production.js 
 
@@ -233,10 +235,13 @@ css 变成一行，去掉注释
 
 other.js 文件中，也引入了第三方库， math.js
 
-缺点：
-	
-	直接打包，会在每个文件中，都有 math.js 的代码，那么如何优化呢？
+开发环境下可以不分割，生产版本，一定要拆出来
 
+
+
+缺点：
+	直接打包，会在每个文件中，都有 math.js 的代码，那么如何优化呢？
+	
 	把 math 整个文件打入 业务代码中，如果业务代码改变，contentHash 改变，整个文件重新打包，影响打包速度。
 
 
@@ -299,6 +304,15 @@ plugins: [
 ```
 
 
+
+chunks 来源：
+
++ entry
++ splitChunks
++ 异步文件
+
+
+
 ## 10-7 异步加载
 
 
@@ -332,15 +346,16 @@ module： webpack 中一切皆模块， 只有可以被引用的文件，都是�
 chunk： 多模块合并成的， 如 entry import() splitChunk
 
 > chunk三大来源
-	
+
 	entry
 	splitChunks
 	import()
-	
-	
-	
+
+
+​	
+​	
 是一系列模块文件生成的文件
-	
+​	
 	比如 entry index.js 文件，可能不止index.js 这一个文件，把这个页面引用的 其他文件，生成 chunk
 	
 	比如异步引入文件，import().then 生成一个 chunk
@@ -348,7 +363,7 @@ chunk： 多模块合并成的， 如 entry import() splitChunk
 	比如，把所有的第三方库，生成一个 chunk
 	
 	把 公共模块，生成一个chunk
-	
+
 bundle： 最终的输出文件，在 dist 文件下生成的文件。
 
 
@@ -358,13 +373,14 @@ bundle： 最终的输出文件，在 dist 文件下生成的文件。
 
 	开发环境下，优化打包构建速度，提示开发体验和效率
 	生产环境下，优化产出代码，产品性能
-	
-	
+
+
+​	
 构建速度：
-	
+​	
 	更小
 		因为uglifyjs不支持es6语法，所以用terser-webpack-plugin替代uglifyjs-webpack-plugin
-
+	
 		TerserJSPlugin，js压缩
 		OptimizeCSSAssetsPlugin， css压缩
 		ignorePlugin，不引入无用模块，比如引入 moment日期内库，默认引入所有语音js代码，只引入中文、英文即可
@@ -386,16 +402,16 @@ bundle： 最终的输出文件，在 dist 文件下生成的文件。
 	
 
 	 {
-        test: /\.js$/,
-        use: ['babel-loader ? cacheDirectory'],  // 使用缓存，只要es6代码没有改的，不用重新编译，
-        include: srcPath,  // include 和 exclude 只写一个就可以
-        exclude: /node_modules/  排除范围
-    },
+	    test: /\.js$/,
+	    use: ['babel-loader ? cacheDirectory'],  // 使用缓存，只要es6代码没有改的，不用重新编译，
+	    include: srcPath,  // include 和 exclude 只写一个就可以
+	    exclude: /node_modules/  排除范围
+	},
 
 
-	
+​	
 ## 10-10 ignorePlugin、noparse
-	
+
 moment.js 前端使用的处理日期的内库
 	
 默认会引入所有语音js代码，代码过大
@@ -414,8 +430,8 @@ plugins:[
 import moment from 'moment'
 import 'moment/locale/zh-cn' // 手动引入中文语音包
 ```
-	
-	
+
+
 ignorePlugin 直接不引入，代码中没有
 
 noParse 引入，但是不打包, (不编译，不进行模块化分析
@@ -439,7 +455,7 @@ noParse: [/react\.min\.js$/]
 }
 
 
-```	
+```
 
 ## 10-11 happyPack 多进程打包、 paralleUglify 多进程压缩js
 
@@ -510,17 +526,17 @@ new ParallelUglifyPlugin({
 
 	开发环境 devServer 会有
 	生成环境，是不允许的
-
+	
 	watch: true, // 开启监听，默认为 false
-    watchOptions: {
-        ignored: /node_modules/, // 忽略哪些
-        // 监听到变化发生后会等300ms再去执行动作，防止文件更新太快导致重新编译频率太高
-        // 默认为 300ms
-        aggregateTimeout: 300,
-        // 判断文件是否发生变化是通过不停的去询问系统指定文件有没有变化实现的
-        // 默认每隔1000毫秒询问一次
-        poll: 1000
-    }
+	watchOptions: {
+	    ignored: /node_modules/, // 忽略哪些
+	    // 监听到变化发生后会等300ms再去执行动作，防止文件更新太快导致重新编译频率太高
+	    // 默认为 300ms
+	    aggregateTimeout: 300,
+	    // 判断文件是否发生变化是通过不停的去询问系统指定文件有没有变化实现的
+	    // 默认每隔1000毫秒询问一次
+	    poll: 1000
+	}
 
 热更新：
 
@@ -529,7 +545,7 @@ new ParallelUglifyPlugin({
 	自动刷新：整个网页刷新，状态会丢失，比如表单里面的输入会丢失
 	
 	热更新：新代码生效，网页不刷新，状态不丢失
-	
+
 webpack.dev.js
 
 几个步骤：
@@ -748,7 +764,7 @@ tree shaking
 	    path: distPath,
 	    // publicPath: 'http://cdn.abc.com'  // 修改所有静态文件 url 的前缀（如 cdn 域名），这里暂时用不到
 	},
-```	
+```
 
 
 ## 10-16  tree shaking
@@ -774,11 +790,11 @@ ES6 module 静态引入，编译时引用
 	无条件引入
 	打包的时候，能直接识别到
 	不能在条件中引用，不能通过代码判断，是否能用
-	
+
 commonjs 动态引入，执行时引入
 	
 	打包的时候不知道是啥，只有执行的时候才能引用
-	
+
 只有 es6 module 才能静态分析， 实现 tree shaking
 
 webpack打包的时候，代码还没有执行，只是静态分析，代码还没有正式被使用
@@ -855,10 +871,10 @@ console.log(str);
 		}
 
 
-	
+​	
 + babel-polyfill
 	
-		
+	
 		core.js 集成了 es6、es7 新语法，补丁
 		regenerator 库， 有一些语法 core.js 中没有
 		
@@ -867,9 +883,10 @@ console.log(str);
 		对不支持某些语法的浏览器，自己实现，polyfill 帮你转成 es5方法
 		
 		对浏览器当前情况，做补充和兼容
-		
-		
-
+	
+	
+​	
+	
 + babel-runtime
 
 babel 和 polyfill区别：	
@@ -1005,11 +1022,11 @@ Array.prototype.includes = 100
 	
 
 	plugin:
-	 
+	
 	 DllPlugin	
 	 HotModulePlugin	
 	 MiniCssExtractPlugin	
-	 
+	
 	  
 ## 10-25
 
@@ -1017,6 +1034,7 @@ Array.prototype.includes = 100
 
 		babel 语法编译工具，不关心模块化
 		
+	
 		webpack 打包构建共建，多个 loader plugin 集合
 	
 2. 如何产出一个lib
@@ -1038,14 +1056,13 @@ Array.prototype.includes = 100
 		
 		vue 异步组件： components: {
 		 border: ()=> import
-	
+		
 		}
 		
 		vue-router， 异步路由懒加载
 		
 		component: ()=> import 
 	
-
 4. 为何 proxy 不能被 polyfill
 
 		class 可以通过 function模拟  

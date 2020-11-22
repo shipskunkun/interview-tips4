@@ -80,6 +80,7 @@
 
 		缓存，data 不变不会重新计算
 		
+	
 		提高性能
 	
 4.  为何组件data 必须是一个函数
@@ -98,10 +99,10 @@
 
 5. ajax 请求放在哪个生命周期
 
-	####真的，面过了，而且还答错了。
+	#### 真的，面过了，而且还答错了。
 
 		看情况，一般放在created 中就可以了，如果有依赖dom 必须存在的情况，就放到 mounted中
-
+	
 		mounted 中，js渲染完， 数据挂载完。  
 		js 是单线程的，ajax 异步获取数据，   
 		放在 mounted 之前， 没有用，还会更混乱。
@@ -113,6 +114,7 @@
 	
 		$props
 		
+	
 		<user v-bind:="$props">
 	
 2. 如何自己实现 v-model?
@@ -121,11 +123,11 @@
 		mixin  
 		mixin 的缺点
 	
-	
 4. 何时使用异步组件？
 	
 		加载大组件 component{ top: ()=> import  }
 		
+	
 		路由异步加载
 	
 5. 何时使用 keep-alive
@@ -146,9 +148,10 @@
 	
 2. 什么是作用域插槽？
 
-		slot 子组件，把data 传给 使用 slot的地方
-		
-		注意，数据定义是在 子组件中， 向外传出来数据，
+    slot 子组件，把data 传给 使用 slot的地方
+    	
+
+    	注意，数据定义是在 子组件中， 向外传出来数据，
 
 3.  action 和 mutation 有何 区别
 	
@@ -157,7 +160,6 @@
 		mutation 做原子操作
 		
 		action 可以整合多个 mutation
-	
 	
 4. Vue router
 
@@ -202,13 +204,13 @@
 
 
 #### 3. 监听数组变化？（重要！
-	
+
 		Object.defineProperty 不能监听数组变化
 		
 		重新定义原型，重写 pop、push ，实现监听
 		
 		proxy 可以原生支持监听数组变化
-	
+
 4. 响应式原理
 	
 		主要讲两点：  
@@ -226,11 +228,11 @@
 			比如只比较同级
 			如果是type不相同，直接销毁重建
 			通过tag和 key 判断是不是同一个 vnode
-		
+	
 ## 5-6
-		
+
 1. 简述 diff 算法过程
- 
+
 		patch(elem, vnode) 和 patch(vnode, newVnode)  
 		patchVnode 、addVnodes 、 removeVnodes  
 		updataChildren  
@@ -239,6 +241,7 @@
 	
 		异步渲染，合并data修改，提高渲染性能
 		
+	
 		$nextTick 在 DOM 更新完之后，触发回调
 	
 3. vue 常见性能优化
@@ -265,4 +268,4 @@
 		9. 前端通用性能优化，图片懒加载
 		10. 使用ssr
 		11. webpack层级优化
-		 
+	
