@@ -28,6 +28,7 @@ deep, 为什么不能打印出old值？
 		deep: true
 		handler(oldval, val) {}
 
+
 ### watch 如果监听引用类型，是拿不到 oldVal 的 ？？？ 这是什么意思
 
 ```js
@@ -115,8 +116,8 @@ event 参数，自定义参数
 
 ​	
 ​	
-	event.__proto__.constructor  是原生的 event 对象
-	
+​	event.__proto__.constructor  是原生的 event 对象
+​	
 	event.target  
 	
 	event.currentTarget 
@@ -129,6 +130,7 @@ event 参数，自定义参数
 	v-on:click.stop   阻止事件冒泡
 	v-on:submit.prevent 阻止默认行为
 	v-on:click.capture 内部元素触发事件先在此处理，然后才交给内部元素进行处理 
+
 
 事件被绑定到哪里
 
@@ -197,6 +199,7 @@ beforeDestroy() {
 }
 ```
 
+
 #### vue中利用 bus 做组件间传值
 
 有两种方法，一种是在每个使用该页面的地方，都 导入事件对象
@@ -209,9 +212,11 @@ export default new Vue()
 
 import event from './event'
 
-let bus = import bus from './event'
-Vue.prototype.$bus = bus
+
+import Bus from './event';
+Vue.prototype.$bus = new Bus();
 ```
+
 
 
 
@@ -233,8 +238,12 @@ Vue.prototype.$bus = bus
 7. beforeDestroy，销毁绑定事件监听	
 
  	beforeDestroy钩子函数在实例销毁之前调用。在这一步，实例仍然完全可用。 	
-
- 	比如消除 setTimout 定时任务，绑定事件
+	   
+	   1. 解绑自定义事件， event.$off, 
+	   2. 清楚定时器
+	   3. 解绑自定义的dom 事件，addEventLisener, 如 window scroll
+	
+   
 
 8. destroyed钩子函数在Vue 实例销毁后调用。调用后，Vue 实例指示的所有东西都会解绑定，所有的事件监听器会被移除，所有的子实例也会被销毁。
 
@@ -244,14 +253,18 @@ Vue.prototype.$bus = bus
 
 
 
-
-父 beforeCreate > 父created > 父 beforMount , 子组件beforeCreate ， 子组件created > 子组件beforMount， 子组件mounted，  父组件 mounted
-
-
-父组件 beforeupdate > 子组件beforeupdate > 子组件 updated> 父组件 updated
-
-
-
+一、加载渲染过程
+	
+	父beforeCreate->父created->父beforeMount->子beforeCreate->子created->子beforeMount->子mounted->父mounted
+二、子组件更新过程
+	
+	父beforeUpdate->子beforeUpdate->子updated->父updated
+三、父组件更新过程
+	
+	父beforeUpdate->父updated
+四、销毁过程
+	
+	父beforeDestroy->子beforeDestroy->子destroyed->父destroyed
 
 
 
@@ -538,6 +551,8 @@ h5 ，无论访问什么路径，都返回 index.html
 所以需要配置 404 页面
 
 给个警告，因为这么做以后，你的服务器就不再返回 404 错误页面，因为对于所有路径都会返回 index.html 文件。为了避免这种情况，你应该在 Vue 应用里面覆盖所有的路由情况，然后在给出一个 404 页面。
+
+这部分是前端来做
 
 ```javascript
 const router = new VueRouter({

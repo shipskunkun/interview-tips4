@@ -55,6 +55,8 @@ oninput和onchange的区别
 
 
 
+
+
 ```
 npm i http-server -g   
 http-server -p 8001  
@@ -90,6 +92,20 @@ function defineReactive(target, key, value) {
         }
     })
 }
+
+```
+思路：
+定义函数 observer：
+
+	1. 判断是否是对象还是基础类型
+	2. 判断是否是数组
+	3. 对每个obeject每个key监听
+监听函数：
+
+	1. 对value 执行 observer 函数
+	2. 使用Object.defineProperty 
+
+```
 
 // 深度监听
 function defineReactive(target, key, value) {

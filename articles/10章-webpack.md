@@ -168,7 +168,7 @@ plugins: [
 
 
 
-开发环境下，不做改变。
+开发环境下，可以不做改变。
 在线上环境下，抽离。  
 webpack.production.js 
 
@@ -235,8 +235,11 @@ css 变成一行，去掉注释
 
 other.js 文件中，也引入了第三方库， math.js
 
+开发环境下可以不分割，生产版本，一定要拆出来
+
+
+
 缺点：
-	
 	直接打包，会在每个文件中，都有 math.js 的代码，那么如何优化呢？
 	
 	把 math 整个文件打入 业务代码中，如果业务代码改变，contentHash 改变，整个文件重新打包，影响打包速度。
@@ -299,6 +302,15 @@ plugins: [
     })
 ]
 ```
+
+
+
+chunks 来源：
+
++ entry
++ splitChunks
++ 异步文件
+
 
 
 ## 10-7 异步加载
@@ -368,6 +380,7 @@ bundle： 最终的输出文件，在 dist 文件下生成的文件。
 ​	
 	更小
 		因为uglifyjs不支持es6语法，所以用terser-webpack-plugin替代uglifyjs-webpack-plugin
+	
 		TerserJSPlugin，js压缩
 		OptimizeCSSAssetsPlugin， css压缩
 		ignorePlugin，不引入无用模块，比如引入 moment日期内库，默认引入所有语音js代码，只引入中文、英文即可
@@ -379,14 +392,11 @@ bundle： 最终的输出文件，在 dist 文件下生成的文件。
 	
 	缓存
 		优化 babel-loader，开启缓存，cacheDirectory，明确范围，include，exclude，不用每次重新编译
-		DllPlugin  比较大的第三方库，不用每次打包都打包一次
 	
 	性能
 		自动刷新
 		热更新  浏览器不刷新，代码已生效
 
-
-​	
 
 优化babel-loader
 	
