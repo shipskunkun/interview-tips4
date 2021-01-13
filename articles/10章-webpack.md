@@ -100,11 +100,11 @@ module.exports = smart(webpackCommonConf, {
 打包生成文件，如果打包的文件变了，hash值就会变，文件的缓存就会失效。	
 如果js文件没变，请求的时候就会命中缓存。
 ​	
-	output: {
-		filename: 'bundle.[contentHash:8].js',
-		path: distPath
-	}
-	
+​	output: {
+​		filename: 'bundle.[contentHash:8].js',
+​		path: distPath
+​	}
+​	
 	生成：
 	
 	bundle.12fjdggg.js
@@ -356,8 +356,8 @@ chunk： 多模块合并成的， 如 entry import() splitChunk
 ​	
 是一系列模块文件生成的文件
 ​	
-	比如 entry index.js 文件，可能不止index.js 这一个文件，把这个页面引用的 其他文件，生成 chunk
-	
+​	比如 entry index.js 文件，可能不止index.js 这一个文件，把这个页面引用的 其他文件，生成 chunk
+​	
 	比如异步引入文件，import().then 生成一个 chunk
 	
 	比如，把所有的第三方库，生成一个 chunk
@@ -375,12 +375,11 @@ bundle： 最终的输出文件，在 dist 文件下生成的文件。
 	生产环境下，优化产出代码，产品性能
 
 
-​	
 构建速度：
 ​	
+
 	更小
-		因为uglifyjs不支持es6语法，所以用terser-webpack-plugin替代uglifyjs-webpack-plugin
-	
+		因为uglifyjs不支持es6语法，所以用terser-webpack-plugin替代uglifyjs-webpack-plugin	
 		TerserJSPlugin，js压缩
 		OptimizeCSSAssetsPlugin， css压缩
 		ignorePlugin，不引入无用模块，比如引入 moment日期内库，默认引入所有语音js代码，只引入中文、英文即可
@@ -886,8 +885,9 @@ console.log(str);
 		对浏览器当前情况，做补充和兼容
 	
 	
+
 ​	
-	
+​	
 + babel-runtime
 
 babel 和 polyfill区别：	
