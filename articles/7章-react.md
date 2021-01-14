@@ -89,6 +89,25 @@ this.state.list.map(  // 生成 li 构成的新数组，通过{} 展开数组
 
 ####  7-4 React事件为何bind this (11:14)
 
+什么时候bind this？
+
+1. 在 constructor 中定义
+2. 在绑定的事件的时候，调用 bind(this)
+
+
+
+```
+TypeError [ERR_INVALID_ARG_TYPE]: The "path" argument must be of type string. Received undefined
+```
+
+报错，原因：
+
+react-scripts 版本低，升级版本
+
+
+
+
+
 ####  7-5 React事件和DOM事件的区别 (08:31)
 
 ####  7-6 React表单知识点串讲 (07:57)
