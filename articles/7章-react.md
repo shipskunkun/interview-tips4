@@ -89,10 +89,13 @@ this.state.list.map(  // 生成 li 构成的新数组，通过{} 展开数组
 
 ####  7-4 React事件为何bind this (11:14)
 
+#### 7-5 React事件和DOM事件的区别 (08:31)
+
 什么时候bind this？
 
 1. 在 constructor 中定义
 2. 在绑定的事件的时候，调用 bind(this)
+3. 使用箭头函数
 
 
 
@@ -106,9 +109,42 @@ react-scripts 版本低，升级版本
 
 
 
+为什么在constructor 中效率高？
+
+因为只执行一次，如果在绑定的时候bind ，每次调用方法都要重新修改this
+
+但是：如果要传递参数，就一定要bind，其他方法都没效果
 
 
-####  7-5 React事件和DOM事件的区别 (08:31)
+
+事件中的 event 不是原生事件对象，是react 封装的对象
+
+```react
+console.log('event', event) // 不是原生的 Event ，原生的 MouseEvent
+console.log('target', event.target) // 指向当前元素，即当前元素触发
+console.log('current target', event.currentTarget) // 指向当前元素，假象！！！
+
+
+console.log('nativeEvent', event.nativeEvent)
+console.log('nativeEvent target', event.nativeEvent.target)  // 指向当前元素，即当前元素触发
+console.log('nativeEvent current target', event.nativeEvent.currentTarget) // 指向 document ！！！
+
+
+// vue event是原生事件
+<button data-get="数据按钮" @click="getRvent($event)">获取事件对象</button>
+```
+
+
+
+event.target 和 event.currentTarget 区别？
+
+前者是真正点击元素，后者是绑定事件的元素
+
+####  
+
+
+
+
 
 ####  7-6 React表单知识点串讲 (07:57)
 
