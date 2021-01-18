@@ -394,10 +394,151 @@ React v16.3之前的生命周期函数（图中实际上少了componentDidCatch)
 
 #### 7-28 串讲react-redux知识点 (05:14)
 
+通过在app外层套用 provider ，每个组件拥有store
+
+四个要点：
+
+provider
+
+connect
+
+mapStateToProps
+
+mapDispatchToProps
+
+
+
+store.dispatch
+
+
+
+mapStateToProps
+
+mapDispatchToProps  自定义事件
+
+
+
+createStore 接受 reducers 为参数，创建store并传递给provider, 在根节点上，使得每个组件拿到store
+
+reducers 通过 combineReducers  合并成一个
+
+
+
+```react
+import React from 'react'
+import { Provider } from 'react-redux'
+import { createStore } from 'redux'
+import todoApp from './reducers'
+import App from './components/App'
+
+let store = createStore(todoApp)
+
+export default function () {
+    return <Provider store={store}>
+        <App />
+    </Provider>
+}
+
+
+const todoApp = combineReducers({
+  todos,
+  visibilityFilter
+})
+
+
+
+```
+
+组件中如何 dispatch action？
+
+
+
+```react
+// 函数组件，接收 props 参数
+let AddTodo = ({ dispatch }) => {
+  // dispatch 即 props.dispatch
+// connect 高阶组件 ，将 dispatch 作为 props 注入到 AddTodo 组件中
+ dispatch(addTodo(input.value))
+AddTodo = connect()(AddTodo)
+```
+
+
+
 ####  7-29 Redux action如何处理异步 (03:32)
+
+同步action，返回一个对象，type + data
+
+异步action，使用redux-thunk 中间件，使用中间件之后，返回 一个函数，参数是 dispatch，dispatch 参数是 同步的action 对象
+
+
+
+其他几个中间件：
+
+redux-promise, redux-saga
+
+
+
+
 
 ####  7-30 简述Redux中间件原理 (07:07)
 
+
+
+redux 单选数据量
+
+view  事件， dispatch，action，reducer， view
+
+想要插入自己的逻辑，在哪里插入，只能在dispatch 过程中添加。
+
+案例：redux中间件，logger
+
+思路：
+
+1. 使用变量保存store.dispatch ，
+2. 给 store.dispatch 重新赋值
+3. 然后执行 老的方法即可
+
+
+
+redux 数据流图，加上，中间件之后的图。
+
+
+
 ####  7-31 串讲react-router知识点 (04:02)
 
+模式，hash、history
+
+路由配置，动态路由，懒加载
+
+```react
+Switch
+	路由 ，匹配的组件
+<HashRouter>
+  <Switch>
+    <Route path="">
+      <Home/>
+    </Route>
+  </Switch>
+</HashRouter>
+```
+
+动态路由：
+
+​	path="/child/:id"
+
+
+
+路由跳转：
+
+​	Link  to=""
+
+​	或者：history.push
+
+
+
+懒加载：
+
+​	lazy()  import ,   suspense
+
 ####  7-32 React使用-考点总结 (10:29)
+
