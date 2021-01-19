@@ -362,37 +362,378 @@ React v16.3之前的生命周期函数（图中实际上少了componentDidCatch)
 
 8. Render Props
 
-   
+
+
+
+函数组件和class 声明的组件有何不同？
+
+函数组件接受 props数据，返回 JSX内容， 没有state 声明、没有constructor， 没有定义 render 函数、没有定义方法 等
+
+1. 纯函数，输入props，输出jsx
+2. 没有实例，没有生命周期，没有state
+3. 不能扩展其他方法
 
 ####  7-14 什么是React非受控组件 (09:18)
 
+受控组件和非受控
+
+1. ref
+2. defaultValue 和 defaultChecked
+3. 手动操作DOM元素
+
+
+
+自己理解：
+
+state 用于设置初始值， input 组件设置 defaultValue， checkbox 中设置  defaultChecked
+
+我们不会监听input操作，获取e.currentTarget 的方式，去修改 state的值
+
+我们通过ref 获取dom元素上的值
+
+
+
+应用场景：
+
+当不能通过state获取值，必须通过dom去获取值
+
+1. 必须手动操作dom元素，setState实现不了
+2. 文件上传
+3. 富文本编辑器，传入dom元素
+
+
+
+有限使用受控组件，数据驱动视图
+
+当必须操作dom时，再使用非受控组件
+
+
+
 ####  7-15 什么场景需要用React Portals (05:37)
+
+传动门
+
+组件默认会按照既定层次嵌套渲染
+
+如何让组件渲染到父组件之外？
+
+
+
+之前所有的元素都是渲染在 root 节点之下，index.js中
+
+```react
+ReactDOM.render(<App />, document.getElementById('root'));
+```
+
+如何渲染在 root 外面？和 root 在dom上是同一级别关系？放在body上？
+
+使用
+
+```react
+return ReactDOM.createPortal(
+	<div className="modal">{this.props.children}</div>,
+	document.body // DOM 节点
+)
+```
+
+
+
+使用场景：
+
+父组件，设置bfc，想要子组件逃离父组件
+
+父组件z-index太小
+
+fixed需要放在body第一层
+
+
+
+一般都是处理css兼容性，布局等问题。
+
+
 
 ####  7-16 是否用过React Context (12:22)
 
+公共信息（语言、主题）如何传递给每个组件？
+
+props太繁琐
+
+使用redux？小题大做。
+
+
+
+看代码后自己的理解：
+
+```react
+1. 首先，通过 createContext 创建
+const ThemeContext = React.createContext('light')
+
+2. 在根组件通过 Provider 给子组件传递 context
+<ThemeContext.Provider value={this.state.theme}></ThemeContext.Provider>
+  
+3. 子组件指定 contextType，子组件中访问 context
+ThemeLink.contextType = ThemeContext // 指定 contextType 读取当前的 theme context。
+const theme = this.context // React 会往上找到最近的 theme Provider，然后使用它的值。
+
+
+函数组件 和 class 组件时不同的。
+<ThemeContext.Consumer> // 函数组件通过 consumer 方式
+```
+
+面试：
+
+1. 应用场景
+2. 核心api，如何生产数据，如何消费数据
+
 ####  7-17 React如何异步加载组件 (07:33)
+
+import 
+
+React.lazy
+
+React.Suspense ??
+
+```react
+const ContextDemo = React.lazy(() => import('./ContextDemo'))
+
+<React.Suspense fallback={<div>Loading...</div>}>
+	<ContextDemo/>
+</React.Suspense>
+```
+
+
 
 #### 7-18 React性能优化-SCU的核心问题在哪里 (06:55)
 
+性能优化对于react ，相较于 vue更为重要
+
+state 不可变值
+
+
+
+shouldComponentUpdate
+
+pureComponent 和 React.memo
+
+immutable.js
+
+
+
+shouldComponentUpdate， 默认返回true，接受的参数，更新后的  props , nextProps 和 更新后的 state， nextState
+
+如果指定的属性更新，那么判断，如果更新，返回true
+
+否则，返回false
+
+```react
+// 演示 shouldComponentUpdate 的基本使用
+shouldComponentUpdate(nextProps, nextState) {
+  if (nextState.count !== this.state.count) {
+    return true // 可以渲染
+  }
+  return false // 不重复渲染
+}
+```
+
+问题？为啥要暴露这个方法？
+
+为啥不像vue一样，改变就更新，不改变就 不更新
+
+
+
 ####  7-19 React性能优化-SCU默认返回什么 (08:51)
+
+默认返回 true
+
+我们看propsDemo 例子，父组件通过input 修改state数据，footer组件没有接受父组件任何值。
+
+但是 footer组件也重新 update了，这不是我们想看到的
+
+只要父组件 state 改变，子组件就更新。
+
+```react
+// 父组件
+return <div>
+  <Input submitTitle={this.onSubmitTitle}/>
+  <List list={this.state.list}/>
+  <Footer/>
+</div>
+
+shouldComponentUpdate(nextProps, nextState) {
+  if (nextProps.text !== this.props.text) {
+    return true // 可以渲染
+  }
+  return false // 不重复渲染
+}
+
+// React 默认：父组件有更新，子组件则无条件也更新！！！
+// 性能优化对于 React 更加重要！
+// SCU 一定要每次都用吗？—— 需要的时候才优化
+```
+
+
+
+
 
 ####  7-20 React性能优化-SCU一定要配合不可变值 (09:17)
 
+总结：
+
+scu 默认返回true, react 默认重新渲染所有子组件
+
+不可变值一起使用
+
+可以先不用scu， 有性能问题时再考虑使用
+
+
+
 ####  7-21 React性能优化-PureComponent和memo (03:13)
+
+纯组件，PureComponent， 对state 和 props 进行浅比较，只比较第一层数据
+
+深比较，耗费性能
+
+函数组件使用 memo
+
+class 组件使用PureComponent
+
+```react
+class List extends React.PureComponent { 
+  shouldComponentUpdate() {/*浅比较*/}
+}
+
+memo
+
+function areEqual(preProps, nextProps) {
+  
+}
+export default React.momo(MyComponent, areEqual)
+```
+
+
 
 ####  7-22 React性能优化-了解immutable.js (03:52)
 
+彻底拥抱，不可变值
+
+基于共享数据（不是深拷贝），速度比较好
+
+理解：
+
+完成层次比较深的数据的 深拷贝，然后赋值给 state，但是速度比较快
+
+
+
 ####  7-23 什么是React高阶组件 (12:31)
+
+
+
+面试：
+
+了解，并应用过，在项目中使用过
+
+
+
+mixin, 在react 中弃用
+
+高阶组件 HOC
+
+render props
+
+
+
+HOC : 类似工厂模式，接受组件作为组件，返回一个新组件，类似装饰器
+
+负载的逻辑部分在高阶组件之中。
+
+```react
+// 高阶组件
+// 复杂逻辑写在这里
+const withMouse = (Component) => {
+    class withMouseComponent extends React.Component {
+
+      <div style={{ height: '500px' }} onMouseMove={this.handleMouseMove}>
+        {/* 1. 透传所有 props 2. 增加 mouse 属性 */}
+        <Component {...this.props} mouse={this.state}/>
+      </div>
+ 	return withMouseComponent
+}   
+  
+const App = (props) => { }
+
+export default withMouse(App) // 返回高阶函数
+```
+
+
+
+redux  connect 是高阶组件
+
+如何理解？面试的时候可以说出
+
+```react
+// connect 是高阶组件
+connet(mapStateToProps, mapDispatchToProps)(TodoList)
+
+两个参数，第一个参数，生成高阶组件，第二个参数，高阶组件接受组件作为参数
+```
+
+
 
 ####  7-24 什么是React Render Props (08:55)
 
+
+
 ####  7-25 React高级特性考点总结 (02:24)
+
+非受控组件：自己操作dom元素
+
+portals：在根组件外
+
+context： 透传给组件
+
+异步组件：分步加载
+
+性能优化，SCU
+
+高阶组件：工厂函数
+
+render props
 
 ####  7-26 Redux考点串讲 (03:39)
 
+单向数据流，画图
+
+react-redux ，如何连接
+
+异步action
+
+中间件
+
+
+
 ####  7-27 描述Redux单项数据流 (03:22)
 
+页面操作，产生一个action
+
+通过 dispatch 触发 reducer 修改对应的 state
+
+state修改，触发视图更新
+
+
+
 #### 7-28 串讲react-redux知识点 (05:14)
+
+4个要点
+
+provider
+
+connect
+
+mapStateToProps
+
+mapDispatchToProps
+
+
 
 ####  7-29 Redux action如何处理异步 (03:32)
 
