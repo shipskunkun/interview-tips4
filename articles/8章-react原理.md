@@ -129,15 +129,15 @@ event不是原生的，是合成事件对象
 
 
 	1. event 是 SyntheticEvent ，模拟出来 DOM 事件所有能力
-    2. event.nativeEvent 是原生事件对象
-    3. 所有的事件，都被挂载到 document 上
-    4. 和 DOM 事件不一样，和 Vue 事件也不一样
+	2. event.nativeEvent 是原生事件对象
+	3. 所有的事件，都被挂载到 document 上
+	4. 和 DOM 事件不一样，和 Vue 事件也不一样
 
 
 
 为啥要做合成事件机制？
 
-1. 为了兼容性和跨平台，迁移到移动端，改改直接用
+1. 为了兼容性和跨平台，迁移到移动端，改一改直接用
 2. 挂载到document 上，减少内存消耗，避免频繁解绑
    1. 没有挂载到组件上，挂载到document上。
 3. 方便事件的统一管理，事务机制
@@ -176,13 +176,17 @@ newState 存入pending 队列
 
 setTimeout 不处于 batch update 中，为什么
 
-
-
 setState 无所谓异步还是同步，看是否命中 isBatchingUpdates
 
 具体看，在 setstate 的时候，isBatchingUpdates 这个值是true 还是false
 
 如果是 false 同步更新，true 异步更新
+
+
+
+自己理解：是否处于正在更新中 batch update，是的话，不要打扰，异步更新
+
+不是，同步更新
 
 
 
@@ -253,9 +257,9 @@ fiber 如何优化：
 
 将第一阶段进行任务拆分，js计算过程拆分
 
-dom渲染时暂停，空闲是恢复
+dom渲染时暂停，空闲时恢复
 
-如何知道dom需要时间？
+如何知道dom需要渲染？
 
 window.requestIdleCallback
 

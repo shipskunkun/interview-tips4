@@ -94,7 +94,7 @@ this.state.list.map(  // 生成 li 构成的新数组，通过{} 展开数组
 什么时候bind this？
 
 1. 在 constructor 中定义
-2. 在绑定的事件的时候，调用 bind(this)
+2. 在绑定的事件的时候，调用 bind(this)   // 如果需要传递参数的话，就需要绑定的时候调用
 3. 使用箭头函数
 
 
@@ -119,26 +119,38 @@ react-scripts 版本低，升级版本
 
 事件中的 event 不是原生事件对象，是react 封装的对象
 
+
+
+问题总结：
+
+1. event.target 和 event.currentTarget 区别
+   1. 前者是真正点击元素，后者是绑定事件的元素
+
+2. react event 和原生event区别？
+
+   1. 原生是 MouseEvent， react 打印出来是合成事件 SyntheticEvent
+
+3.  react 中怎么找到原生事件？
+
+   1. 事件绑定在 document中， currentTarget 是 document
+
+      
+
 ```react
-console.log('event', event) // 不是原生的 Event ，原生的 MouseEvent
 console.log('target', event.target) // 指向当前元素，即当前元素触发
 console.log('current target', event.currentTarget) // 指向当前元素，假象！！！
 
+// 注意，event 其实是 React 封装的。可以看 __proto__.constructor 是 SyntheticEvent 组合事件
+console.log('event', event) // 不是原生的 Event ，原生的 MouseEvent
+console.log('event.__proto__.constructor', event.__proto__.constructor)
 
-console.log('nativeEvent', event.nativeEvent)
+console.log('nativeEvent', event.nativeEvent)  //打印出来是MouseEvent
 console.log('nativeEvent target', event.nativeEvent.target)  // 指向当前元素，即当前元素触发
 console.log('nativeEvent current target', event.nativeEvent.currentTarget) // 指向 document ！！！
-
 
 // vue event是原生事件
 <button data-get="数据按钮" @click="getRvent($event)">获取事件对象</button>
 ```
-
-
-
-event.target 和 event.currentTarget 区别？
-
-前者是真正点击元素，后者是绑定事件的元素
 
 
 
@@ -171,16 +183,40 @@ props类型检查
 
 
 
-子组件可以直接接受父组件传入的方法，子组件不必通过emit 触发父组件方法，直接执行即可。
+如何传递给子组件？
+
+```react
+<Input submitTitle={this.onSubmitTitle}/>  //父组件中定义变量
+
+//子组件中通过 constructor 中 props接受
+class Input extends React.Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            title: ''
+        }
+    }
+  // 使用：
+  ...
+  const { submitTitle } = this.props
+}
+```
+
+子组件中如何执行父组件中传入方法？
+
+```
+子组件通过props拿到父组件传入方法，直接执行该方法即可，子组件不必通过emit 触发父组件方法。
 
 相当于在子组件中直接调用父组件中定义的方法。
+```
 
-
+​	
 
 类型检查
 
 ```react
 class List extends React.Component {}
+//通过类名 . propTypes
 List.propTypes = {
     list: PropTypes.arrayOf(PropTypes.object).isRequired
 }
@@ -220,29 +256,60 @@ class StateDemo extends React.Component {}
 
 ```
 
-什么是不可变值
+1. 什么是不可变值？
 
-当我们修改state的值，不要直接操作 state
+​	当我们修改state的值，不要直接操作 state
 
-需要用一个变量，把state赋值给 这个变量，这个变量改变后，在通过 setState 修改。
+​	需要用一个变量，把state赋值给 这个变量，这个变量改变后，把这个值赋值给需要修改的state变量。
 
-我们在对 state 某个值赋值的时候，不能影响之前 state的值，比如 arr 的push操作，会影响原数据，不行。
+​	如果我们的state修改变量是一个数组时，不想赋值，修改，再赋值，直接对改数组操作，注意这个操作不能影响之前 state的值，比如 arr 的push操作，会影响原数据，不行。
 
-一句话，在setState 之前，不能修改state值。
+​	一句话，在setState 之前，不能修改state值。
 
-注意，不能直接对 this.state.list 进行 push pop splice 等，这样违反不可变值
+​	注意，不能直接对 this.state.list 进行 push pop splice 等，这样违反不可变值
 
 ```react
+this.state.count++ // 错误
+count: this.state.count + 1  //正确
+
 arr.concat(100)   //arr 值没有改变
 
 arr.push(100)  //arr 值改变
 ```
 
+哪些操作是可以的？
+
+数组，对象
+
+```react
+// // 不可变值（函数式编程，纯函数） - 数组
+const list5Copy = this.state.list5.slice()
+list5Copy.splice(2, 0, 'a') // 中间插入/删除
+this.setState({
+    list1: this.state.list1.concat(100), // 追加
+    list2: [...this.state.list2, 100], // 追加
+    list3: this.state.list3.slice(0, 3), // 截取
+    list4: this.state.list4.filter(item => item > 100), // 筛选
+    list5: list5Copy // 其他操作
+})
+// // 注意，不能直接对 this.state.list 进行 push pop splice 等，这样违反不可变值
+
+// // 不可变值 - 对象
+this.setState({
+    obj1: Object.assign({}, this.state.obj1, {a: 100}),
+    obj2: {...this.state.obj2, a: 100}
+})
+// // 注意，不能直接对 this.state.obj 进行属性设置，这样违反不可变值
+
+```
+
+
+
 ####  7-9 setState是同步还是异步 (07:01)
 
-可以理解为类似 ajax， 是异步操作，我们
+可以理解为类似 ajax，纯粹的 setState 是异步操作
 
-在 setState 后，访问state 值，是没有修改过的state值
+我们在 setState 后，再访问state 值，是没有修改过的state值
 
 那么，如何拿到 修改后的 state值？
 
@@ -268,16 +335,15 @@ setTimeout(() => {
   console.log('count in setTimeout', this.state.count)
 }, 0)
 
+// 自己定义的 DOM 事件，setState 是同步的
+componentDidMount() {
+  document.body.addEventListener('click', this.bodyClickHandler)
+}
 bodyClickHandler = () => {
   this.setState({
     count: this.state.count + 1
   })
   console.log('count in body event', this.state.count)
-}
-componentDidMount() {
-  // 自己定义的 DOM 事件，setState 是同步的
-  console.log('lala')
-  document.body.addEventListener('click', this.bodyClickHandler)
 }
 ```
 
@@ -387,15 +453,15 @@ React v16.3之前的生命周期函数（图中实际上少了componentDidCatch)
 
 state 用于设置初始值， input 组件设置 defaultValue， checkbox 中设置  defaultChecked
 
-我们不会监听input操作，获取e.currentTarget 的方式，去修改 state的值
+我们不会监听input操作，获取e.currentTarget 的方式，去修改 state的值，所以我们不从 state 中拿值。
 
-我们通过ref 获取dom元素上的值
+我们通过ref 获取dom元素上的值，这个值是正确的。
 
 
 
 应用场景：
 
-当不能通过state获取值，必须通过dom去获取值
+一句话：当不能通过state获取值，必须通过dom去获取值
 
 1. 必须手动操作dom元素，setState实现不了
 2. 文件上传
@@ -411,7 +477,7 @@ state 用于设置初始值， input 组件设置 defaultValue， checkbox 中�
 
 ####  7-15 什么场景需要用React Portals (05:37)
 
-传动门
+传动门，大门。
 
 组件默认会按照既定层次嵌套渲染
 
@@ -465,13 +531,13 @@ props太繁琐
 看代码后自己的理解：
 
 ```react
-1. 首先，通过 createContext 创建
+1. 首先，通过 createContext 创建 context组件。
 const ThemeContext = React.createContext('light')
 
-2. 在根组件通过 Provider 给子组件传递 context
+2. 在根组件通过   context组件名.Provider 给子组件传递 context
 <ThemeContext.Provider value={this.state.theme}></ThemeContext.Provider>
   
-3. 子组件指定 contextType，子组件中访问 context
+3. 子组件指定 contextType = context组件名 ，子组件中访问 context
 ThemeLink.contextType = ThemeContext // 指定 contextType 读取当前的 theme context。
 const theme = this.context // React 会往上找到最近的 theme Provider，然后使用它的值。
 
@@ -626,8 +692,6 @@ export default React.momo(MyComponent, areEqual)
 
 ####  7-23 什么是React高阶组件 (12:31)
 
-
-
 面试：
 
 了解，并应用过，在项目中使用过
@@ -636,15 +700,15 @@ export default React.momo(MyComponent, areEqual)
 
 mixin, 在react 中弃用
 
-高阶组件 HOC
+高阶组件 HOC， high order component
 
 render props
 
 
 
-HOC : 类似工厂模式，接受组件作为组件，返回一个新组件，类似装饰器
+HOC : 类似工厂，接受组件作为参数，返回一个新组件，类似装饰器
 
-负载的逻辑部分在高阶组件之中。
+复杂的逻辑部分在高阶组件之中，返回的新数组就有了公共逻辑。
 
 ```react
 // 高阶组件
@@ -675,11 +739,22 @@ redux  connect 是高阶组件
 connet(mapStateToProps, mapDispatchToProps)(TodoList)
 
 两个参数，第一个参数，生成高阶组件，第二个参数，高阶组件接受组件作为参数
+
+todolist 组件中会 props 高阶组件中的 mapStateToProps, mapDispatchToProps
+
 ```
 
 
 
 ####  7-24 什么是React Render Props (08:55)
+
+我理解：和 高阶组件反过来，高阶组件如何扩充组件？把逻辑写在高阶组件中，传入组件为参数，渲染扩充后的组件
+
+子组件被 HOC 高阶组件包裹
+
+
+
+render props，子组件包裹高阶组件，扩充组件，把高阶组件嵌入 app 中，传入render 组件
 
 
 
@@ -707,7 +782,7 @@ react-redux ，如何连接
 
 异步action
 
-中间件
+中间件, redux-thunk, redux-saga
 
 
 
@@ -772,12 +847,20 @@ const todoApp = combineReducers({
 
 
 ```react
-// 函数组件，接收 props 参数
+// 函数组件，接收 props 参数， 每个组件有store属性
 let AddTodo = ({ dispatch }) => {
   // dispatch 即 props.dispatch
+  
 // connect 高阶组件 ，将 dispatch 作为 props 注入到 AddTodo 组件中
  dispatch(addTodo(input.value))
 AddTodo = connect()(AddTodo)
+  
+// connect 高阶组件，将 state 和 dispatch 注入到组件 props 中
+const VisibleTodoList = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(TodoList)  
+  
 ```
 
 

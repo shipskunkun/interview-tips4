@@ -8,7 +8,9 @@
 
    自定义事件，和vue一样
 
-   redux 和 context
+   redux 
+
+   context
 
    
 
@@ -18,6 +20,8 @@
 
    执行返回vnode
 
+   
+
 3. context 是什么，如何应用
 
    ​	父组件向其下所有子孙组件传递信息
@@ -26,15 +30,19 @@
 
    ​	复杂的数据，使用redux
 
+   
+
 4. shoulComponentUpdate
 
    性能优化
 
    配合不可变值一起使用，否则会出错
 
+   
+
 5. 单向数据流
 
-   view ——> action ——>dispatch ——> reducer ——>store
+   view ——> action ——>dispatch ——> reducer ——>state
 
    
 
@@ -44,27 +52,27 @@ setState 中有setTimeout ，先后顺序
 
 
 
-​		什么是纯函数？
+什么是纯函数？
 
-​			返回一个新值，没有副作用，不会修改其他值
-
-​			重点：不可变值
-
-​			arr1 = arr.slice
-
-​	
-
-​	ajax 生命周期
-
-​		和vue 是一样的，componentDidMount, dom 渲染完之后的生命周期中
+	返回一个新值，没有副作用，不会修改其他值
+	
+	重点：不可变值
+	
+	arr1 = arr.slice
 
 ​	
 
-​	为什么要key
+ajax 生命周期
 
-​		和vue一样，是否是同一个samevode
+​	和vue 是一样的，componentDidMount, dom 渲染完之后的生命周期中
 
-​		减少渲染次数，提高渲染性能
+​	
+
+为什么要key
+
+​	和vue一样，是否是同一个samevode
+
+​	减少渲染次数，提高渲染性能
 
 
 
@@ -74,40 +82,45 @@ setState 中有setTimeout ，先后顺序
 
 ​	前者，纯函数，输入props，输出jsx
 
-​	没有实力，没有生命周期，没有state
+​	没有实例，没有生命周期，没有state
 
 ​	不能扩展其他方法
 
 
 
-  2. 什么是受控组件？
+ 2. 什么是受控组件？
 
      表单的值，受state控制
 
-     需要自行监听onchange, 更新组件
+     需要自行监听onchange, 更新state 值，更新组件
 
      对比非受控组件
 
      
 
-		3. 何时使用异步组件？
+3. 何时使用异步组件？
 
      加载大组件
 
      路由懒加载
 
-		4. 多个组件有
-
-     		1. HOC 高阶组件
-     		2. render props
-     		3. mixin, 已经被react废弃
-
-		5. redux 如何进行一步请求
-
-     		1. 使用异步acion
-     		2. redux-thunk
-
      
+
+4. 多个组件有
+	
+   5. HOC 高阶组件
+
+   6. render props
+
+ 		3. mixin, 已经被react废弃
+	
+5. redux 如何进行异步步请求
+	
+   9. 使用异步acion
+
+ 		2. redux-thunk
+
+​     
 
 ####  9-4 React真题演练-4-React常见性能优化方式 (03:35)
 
@@ -148,7 +161,7 @@ react 性能优化
 
    放在constructor 中
 
-5. 使用 scp pureComponent  和 memo
+5. 使用 shouldComponentUpdate,  scu，    pureComponent  和 memo
 
 6. 合理使用 immutable.js
 
@@ -169,8 +182,6 @@ react 性能优化
    2. 都提供了响应式和组件化的视图组件，数据驱动视图
 
    3. 都把注意力集中在核心库，其他功能如路由和全局状态管理交给其他库
-
-      
 
       
 
